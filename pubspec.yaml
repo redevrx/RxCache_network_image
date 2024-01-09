@@ -2,7 +2,7 @@ name: rxcache_network_image
 description: "Easy download image from network and show in widget with rxcacheNetworkImage fast load image from network"
 version: 0.0.1
 homepage: https://www.facebook.com/profile.php?id=100094077041664
-repository: https://github.com/redevRx/Flutter-ChatGPT
+repository: https://github.com/redevrx/RxCache_network_image
 
 environment:
   sdk: '>=3.2.3 <4.0.0'
