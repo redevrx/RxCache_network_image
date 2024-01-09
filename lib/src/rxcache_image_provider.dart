@@ -132,7 +132,12 @@ class RxCacheImageProvider extends ImageProvider<RxCacheImageProvider> {
           },
         );
 
-        return decode(await ImmutableBuffer.fromUint8List(bytes!));
+        if (bytes == null) {
+          throw NetworkImageLoadException(
+              statusCode: HttpStatus.badRequest, uri: Uri.parse(url));
+        }
+
+        return decode(await ImmutableBuffer.fromUint8List(bytes));
       }
 
       ///
@@ -219,7 +224,12 @@ class RxCacheImageProvider extends ImageProvider<RxCacheImageProvider> {
           },
         );
 
-        return decode(await ImmutableBuffer.fromUint8List(bytes!));
+        if (bytes == null) {
+          throw NetworkImageLoadException(
+              statusCode: HttpStatus.badRequest, uri: Uri.parse(url));
+        }
+
+        return decode(await ImmutableBuffer.fromUint8List(bytes));
       }
 
       ///

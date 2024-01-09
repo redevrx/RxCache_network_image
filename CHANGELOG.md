@@ -1,3 +1,5 @@
+## 0.0.4
+ - edit performance
 ## 0.0.3
  - Refactor Download File
  - Edit Load Image from cache

@@ -209,6 +209,7 @@ class RxCacheManager with RxCacheManagerMixing {
     final Uri resolved = Uri.base.resolve(url ?? '');
     final fileName = key ?? resolved.pathSegments.lastOrNull;
     final mFile = File("$cacheFolder/$fileName.bin");
+    if (url == null) return null;
 
     try {
       ///
