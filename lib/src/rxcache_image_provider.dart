@@ -34,6 +34,7 @@ class RxCacheImageProvider extends ImageProvider<RxCacheImageProvider> {
     return SynchronousFuture<RxCacheImageProvider>(this);
   }
 
+  @Deprecated("using async load")
   @override
   ImageStreamCompleter loadBuffer(
       RxCacheImageProvider key, DecoderBufferCallback decode) {
@@ -66,6 +67,7 @@ class RxCacheImageProvider extends ImageProvider<RxCacheImageProvider> {
     return imageStream;
   }
 
+  @Deprecated("using async load")
   Future<ui.Codec> _loadImageBufferAsync(
       RxCacheImageProvider key,
       StreamController<ImageChunkEvent> chunkEvents,
@@ -79,6 +81,7 @@ class RxCacheImageProvider extends ImageProvider<RxCacheImageProvider> {
     );
   }
 
+  @Deprecated("using async load")
   Future<ui.Codec> _loadImageBuffer(
     RxCacheImageProvider key,
     StreamController<ImageChunkEvent> chunkEvents,

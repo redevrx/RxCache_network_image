@@ -29,6 +29,16 @@ rxcache_network_image: 0.0.1
 RxImage.cacheNetwork(
 url: urls[index],
 );
+
+
+///set memory cache
+cacheManager.setMemoryCache(size)
+
+///download image
+cacheManager.download()
+
+///get file cache
+cacheManager.getFile()
 ```
 
 ## Example
@@ -76,4 +86,4 @@ class _MyHomePageState extends State<MyHomePage> {
 ```
 ## Preview
 
-<img src="assets/example_preview.gif" width="350"  alt="Example Video App"/>
+<img src="https://github.com/redevrx/RxCache_network_image/blob/main/assets/example_preview.gif?raw=true" width="350"  alt="Example Video App"/>
