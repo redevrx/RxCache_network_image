@@ -79,4 +79,4 @@ class _MyHomePageState extends State<MyHomePage> {
 ```
 ## Preview
 
-<img src="assets/example_preview.gif" width="350"  alt="Example Video App"/># RxCache_network_image
+<img src="assets/example_preview.gif" width="350"  alt="Example Video App"/>
