@@ -1,3 +1,6 @@
+## 0.0.3
+ - Refactor Download File
+ - Edit Load Image from cache
 ## 0.0.2
  - Add RxCacheNetworkProvider
 

@@ -2,12 +2,11 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 
 mixin RxCacheManagerMixing {
   String get cacheFolder;
-  int _maxMemoryCache = 10 * 1024 * 1024;
+  int _maxMemoryCache = 100 * 1024 * 1024;
   String get memorySize;
   final Map<String, Uint8List> _cacheImages = {};
   final List<String> _loadImageTask = [];
@@ -126,19 +125,26 @@ class RxCacheManager with RxCacheManagerMixing {
         _loadImageTask.remove(fileName);
         return;
       }
+      final Uri resolved = Uri.base.resolve(url);
+      final HttpClientRequest request = await _httpClient.getUrl(resolved);
+      headers?.forEach((String name, String value) {
+        request.headers.add(name, value);
+      });
 
-      final request = http.Request("GET", Uri.parse(url));
-      request.headers.addAll(headers ?? {});
-
-      final response = await request.send();
+      final HttpClientResponse response = await request.close();
+      if (response.statusCode != HttpStatus.ok) {
+        await response.drain<List<int>>(<int>[]);
+        throw NetworkImageLoadException(
+            statusCode: response.statusCode, uri: resolved);
+      }
+      final Uint8List bytes = await consolidateHttpClientResponseBytes(
+        response,
+        onBytesReceived: (_, __) {},
+      );
 
       ///save file to dis
-      final writeFileChunk = mFile.openWrite();
-      await for (List<int> chunk in response.stream) {
-        writeFileChunk.add(chunk);
-      }
-
-      await writeFileChunk.close();
+      await mFile.writeAsBytes(bytes);
+      setImageCache(fileName, bytes);
       _loadImageTask.remove(fileName);
     } catch (_) {
       _loadImageTask.remove(fileName);
@@ -241,7 +247,7 @@ class RxCacheManager with RxCacheManagerMixing {
       setImageCache(fileName ?? '', bytes);
 
       ///save file to disk
-      mFile.writeAsBytesSync(bytes);
+      await mFile.writeAsBytes(bytes);
       _loadImageTask.remove(fileName);
 
       return bytes;

@@ -197,7 +197,7 @@ class RxCacheImageProvider extends ImageProvider<RxCacheImageProvider> {
       File? mFile = File('${cacheManager?.cacheFolder}/$mKeyCache.bin');
       if (await mFile.exists()) {
         ///load from dis
-        final bytes = await mFile.readAsBytes();
+        final bytes = mFile.readAsBytesSync();
         final mCode = await ImmutableBuffer.fromUint8List(bytes);
 
         ///set cache in memory
