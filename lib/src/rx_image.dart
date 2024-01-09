@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:rxcache_network_image/rxcache_network_image.dart';
-import 'package:rxcache_network_image/src/rxcache_image_provider.dart';
 
 class RxImage extends StatefulWidget {
   const RxImage({
