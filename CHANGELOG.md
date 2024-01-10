@@ -1,3 +1,5 @@
+## 0.0.5
+ - fig bug load image async in image provider
 ## 0.0.4
  - edit performance
 ## 0.0.3

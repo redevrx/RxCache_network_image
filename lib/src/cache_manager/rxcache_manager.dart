@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
@@ -9,7 +10,7 @@ mixin RxCacheManagerMixing {
   int _maxMemoryCache = 100 * 1024 * 1024;
   String get memorySize;
   final Map<String, Uint8List> _cacheImages = {};
-  final List<String> _loadImageTask = [];
+  final Map<String, StreamController<bool>> _loadImageTask = {};
 
   void clearCache();
   void clearMemoryCache();
@@ -50,7 +51,9 @@ class RxCacheManager with RxCacheManagerMixing {
   // the `Content-Length` HTTP header. We automatically uncompress the content
   // in our call to [consolidateHttpClientResponseBytes].
   static final HttpClient _sharedHttpClient = HttpClient()
-    ..autoUncompress = false;
+    ..autoUncompress = false
+    ..connectionTimeout = const Duration(seconds: 20)
+    ..idleTimeout = const Duration(seconds: 20);
 
   static HttpClient get _httpClient {
     HttpClient? client;
@@ -86,15 +89,15 @@ class RxCacheManager with RxCacheManagerMixing {
     Map<String, String>? headers,
     String? key,
   }) async {
-    if (_cacheFolder == '') {
+    if (_cacheFolder == '' || _cacheFolder == null) {
       await getCache();
     }
     if (url == null || url.isEmpty == true) return;
     final fileName = key ?? Uri.parse(url).pathSegments.lastOrNull;
 
     ///check waiting download
-    if (!_loadImageTask.contains(fileName)) {
-      _loadImageTask.add(fileName ?? '');
+    if (!_loadImageTask.containsKey(fileName)) {
+      _loadImageTask[fileName ?? ''] = StreamController();
       _queueLoad(fileName ?? '', url, headers, key);
     }
   }
@@ -121,10 +124,12 @@ class RxCacheManager with RxCacheManagerMixing {
       final mFile = File("$cacheFolder/$fileName.bin");
 
       ///exists file in disk
-      if (await mFile.length() != 0) {
+      if (mFile.existsSync()) {
+        await _loadImageTask[fileName]?.close();
         _loadImageTask.remove(fileName);
         return;
       }
+
       final Uri resolved = Uri.base.resolve(url);
       final HttpClientRequest request = await _httpClient.getUrl(resolved);
       headers?.forEach((String name, String value) {
@@ -142,11 +147,18 @@ class RxCacheManager with RxCacheManagerMixing {
         onBytesReceived: (_, __) {},
       );
 
-      ///save file to dis
-      await mFile.writeAsBytes(bytes);
       setImageCache(fileName, bytes);
-      _loadImageTask.remove(fileName);
+
+      ///save file to dis
+      File("$cacheFolder/$fileName.bin").writeAsBytes(bytes).then((_) async {
+        _loadImageTask[fileName]
+          ?..sink
+          ..add(true);
+        await _loadImageTask[fileName]?.close();
+        _loadImageTask.remove(fileName);
+      });
     } catch (_) {
+      await _loadImageTask[fileName]?.close();
       _loadImageTask.remove(fileName);
     }
   }
@@ -167,7 +179,8 @@ class RxCacheManager with RxCacheManagerMixing {
       }
       final mKey = url == null ? key : Uri.parse(url).pathSegments.last;
       mFile = File("$_cacheFolder/$mKey.bin");
-      //check exit in memory
+
+      ///check exit in memory
       if (_cacheImages.containsKey(mKey)) {
         mFile = File.fromRawPath(_cacheImages[mKey]!);
       } else {
@@ -213,20 +226,20 @@ class RxCacheManager with RxCacheManagerMixing {
 
     try {
       ///
-      if (_loadImageTask.contains(fileName)) {
-        while (true) {
-          await Future.delayed(const Duration(milliseconds: 10), () {});
-          if (!_loadImageTask.contains(fileName)) {
-            final fileBytes = await getFile(key: fileName);
-            if (fileBytes != null) {
-              return await fileBytes.readAsBytes();
-            }
-            break;
-          }
+      if (_loadImageTask.containsKey(fileName)) {
+        ///wait for downloading
+        await for (final _ in _loadImageTask[fileName]!.stream) {}
+        final fileBytes = getFormMemoryCache(fileName ?? '');
+        if (fileBytes != null) {
+          return fileBytes;
         }
       }
 
-      _loadImageTask.add(fileName ?? '');
+      if (mFile.existsSync()) {
+        return await mFile.readAsBytes();
+      }
+
+      _loadImageTask[fileName ?? ''] = StreamController();
       final HttpClientRequest request = await _httpClient.getUrl(resolved);
       headers?.forEach((String name, String value) {
         request.headers.add(name, value);
@@ -248,15 +261,22 @@ class RxCacheManager with RxCacheManagerMixing {
       setImageCache(fileName ?? '', bytes);
 
       ///save file to disk
-      await mFile.writeAsBytes(bytes);
-      _loadImageTask.remove(fileName);
+      mFile.writeAsBytes(bytes).then((_) async {
+        _loadImageTask[fileName]
+          ?..sink
+          ..add(
+            true,
+          );
+        await _loadImageTask[fileName]?.close();
+        _loadImageTask.remove(fileName);
+      });
 
       return bytes;
     } catch (_) {
+      await _loadImageTask[fileName]?.close();
       _loadImageTask.remove(fileName);
+      return getFormMemoryCache(fileName ?? '');
     }
-
-    return null;
   }
 
   @override

@@ -188,7 +188,8 @@ class RxCacheImageProvider extends ImageProvider<RxCacheImageProvider> {
       ImageDecoderCallback decode) async {
     try {
       final mKeyCache = cacheKey ?? Uri.parse(url).pathSegments.last;
-      if (cacheManager?.cacheFolder == "") {
+      if (cacheManager?.cacheFolder == null ||
+          cacheManager?.cacheFolder == "") {
         await cacheManager?.getCache();
       }
 
@@ -200,7 +201,7 @@ class RxCacheImageProvider extends ImageProvider<RxCacheImageProvider> {
       }
 
       File? mFile = File('${cacheManager?.cacheFolder}/$mKeyCache.bin');
-      if (await mFile.exists()) {
+      if (mFile.existsSync()) {
         ///load from dis
         final bytes = mFile.readAsBytesSync();
         final mCode = await ImmutableBuffer.fromUint8List(bytes);
