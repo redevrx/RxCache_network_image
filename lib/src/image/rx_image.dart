@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:rxcache_network_image/rxcache_network_image.dart';
-import 'package:rxcache_network_image/src/fade_widget.dart';
+import 'package:rxcache_network_image/src/cache_manager/rx_cache_manager_mixing.dart';
+import 'package:rxcache_network_image/src/image/fade_widget.dart';
 
 class RxImage extends StatefulWidget {
   const RxImage({
@@ -360,7 +361,10 @@ class _RxImageState extends State<RxImage> {
     if (wasSynchronouslyLoaded) {
       return child;
     }
-    return FadeWidget(child: child);
+    return FadeWidget(
+      key: UniqueKey(),
+      child: child,
+    );
   }
 
   @override

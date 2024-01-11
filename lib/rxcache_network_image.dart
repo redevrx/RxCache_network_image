@@ -1,3 +1,4 @@
 export 'src/cache_manager/rxcache_manager.dart';
-export 'src/rx_image.dart';
-export 'src/rxcache_image_provider.dart';
+export 'src/cache_manager/base_rx_cache_manager.dart';
+export 'src/image/rx_image.dart';
+export 'src/provider/rxcache_image_provider.dart';

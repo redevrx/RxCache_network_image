@@ -1,3 +1,6 @@
+## 1.0.1
+ - Add Custom Cache Manager
+ - Fix Performance
 ## 1.0.0
  - add Fade in image
 ## 0.0.6

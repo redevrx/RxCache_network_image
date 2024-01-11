@@ -27,7 +27,7 @@ class FadeWidget extends StatefulWidget {
   /// [duration]./
   const FadeWidget({
     required this.child,
-    this.duration = const Duration(milliseconds: 800),
+    this.duration = const Duration(milliseconds: 350),
     this.direction = AnimationDirection.forward,
     this.curve = Curves.easeOut,
     Key? key,

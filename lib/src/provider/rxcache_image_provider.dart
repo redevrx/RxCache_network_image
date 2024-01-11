@@ -4,10 +4,10 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:rxcache_network_image/rxcache_network_image.dart';
+import 'package:rxcache_network_image/src/cache_manager/rx_cache_manager_mixing.dart';
 import 'dart:ui' as ui show Codec;
 
-import 'package:rxcache_network_image/src/multi_image_stream_completer.dart';
+import 'package:rxcache_network_image/src/provider/multi_image_stream_completer.dart';
 
 /// Listener for errors
 typedef ErrorListener = void Function(Object);

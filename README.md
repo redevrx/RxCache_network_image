@@ -20,7 +20,7 @@ and the Flutter guide for
 ## Getting started
 
 ```dart
-rxcache_network_image: 1.0.0
+rxcache_network_image: 1.0.1
 ```
 
 ## Usage
@@ -39,6 +39,20 @@ cacheManager.download()
 
 ///get file cache
 cacheManager.getFile()
+```
+
+## Create Custom CacheManager
+```dart
+class CustomCacheManager extends BaseRxCacheManager {
+  static CustomCacheManager? _instance;
+
+  CustomCacheManager._({String folder = "rx_image_cache"}) : super(folder: folder);
+
+  factory CustomCacheManager({String folder = "rx_image_cache"}) {
+    _instance ??= CustomCacheManager._(folder: folder);
+    return _instance!;
+  }
+}
 ```
 
 ## Example
