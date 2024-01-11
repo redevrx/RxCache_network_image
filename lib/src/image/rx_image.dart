@@ -319,12 +319,6 @@ class _RxImageState extends State<RxImage> {
   }
 
   @override
-  void didChangeDependencies() {
-    precacheImage(widget.image, context);
-    super.didChangeDependencies();
-  }
-
-  @override
   void didUpdateWidget(covariant RxImage oldWidget) {
     if (oldWidget.image != widget.image) {
       _image = Image(
@@ -362,7 +356,7 @@ class _RxImageState extends State<RxImage> {
       return child;
     }
     return FadeWidget(
-      key: UniqueKey(),
+      key: ValueKey(widget.imageUrl),
       child: child,
     );
   }

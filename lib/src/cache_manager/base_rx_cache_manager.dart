@@ -18,8 +18,8 @@ class BaseRxCacheManager implements RxCacheManagerMixing {
   // in our call to [consolidateHttpClientResponseBytes].
   static final HttpClient _sharedHttpClient = HttpClient()
     ..autoUncompress = false
-    ..connectionTimeout = const Duration(seconds: 20)
-    ..idleTimeout = const Duration(seconds: 20);
+    ..connectionTimeout = const Duration(seconds: 30)
+    ..idleTimeout = const Duration(seconds: 30);
 
   static HttpClient get _httpClient {
     HttpClient? client;
@@ -33,7 +33,7 @@ class BaseRxCacheManager implements RxCacheManagerMixing {
   }
 
   final Map<String, Uint8List> _cacheImages = {};
-  final Map<String, StreamController<bool>> _loadImageTask = {};
+  final Map<String, Completer<bool>> _loadImageTask = {};
 
   String? _cacheFolder;
   int _maxMemoryCache = 16;
@@ -69,7 +69,7 @@ class BaseRxCacheManager implements RxCacheManagerMixing {
 
     ///check waiting download
     if (!_loadImageTask.containsKey(fileName)) {
-      _loadImageTask[fileName ?? ''] = StreamController();
+      _loadImageTask[fileName ?? ''] = Completer();
       _queueLoad(fileName ?? '', url, headers, key);
     }
   }
@@ -97,7 +97,6 @@ class BaseRxCacheManager implements RxCacheManagerMixing {
 
       ///exists file in disk
       if (await mFile.exists()) {
-        await _loadImageTask[fileName]?.close();
         _loadImageTask.remove(fileName);
         return;
       }
@@ -124,7 +123,6 @@ class BaseRxCacheManager implements RxCacheManagerMixing {
       ///save file to dis
       resizeAndSave(fileName, mFile, bytes);
     } catch (_) {
-      await _loadImageTask[fileName]?.close();
       _loadImageTask.remove(fileName);
     }
   }
@@ -195,7 +193,7 @@ class BaseRxCacheManager implements RxCacheManagerMixing {
       ///
       if (_loadImageTask.containsKey(fileName)) {
         ///wait for downloading
-        await for (final _ in _loadImageTask[fileName]!.stream) {}
+        await _loadImageTask[fileName]!.future;
         final fileBytes = getFormMemoryCache(fileName ?? '');
         if (fileBytes != null) {
           return fileBytes;
@@ -212,7 +210,7 @@ class BaseRxCacheManager implements RxCacheManagerMixing {
         }
       }
 
-      _loadImageTask[fileName ?? ''] = StreamController();
+      _loadImageTask[fileName ?? ''] = Completer();
       final HttpClientRequest request = await _httpClient.getUrl(resolved);
       headers?.forEach((String name, String value) {
         request.headers.add(name, value);
@@ -238,7 +236,6 @@ class BaseRxCacheManager implements RxCacheManagerMixing {
 
       return bytes;
     } catch (_) {
-      await _loadImageTask[fileName]?.close();
       _loadImageTask.remove(fileName);
       final bytes = getFormMemoryCache(fileName ?? '');
 
@@ -249,11 +246,7 @@ class BaseRxCacheManager implements RxCacheManagerMixing {
   void resizeAndSave(String fileName, File filePath, Uint8List bytes) async {
     await filePath.writeAsBytes(bytes);
     _loadImageTask[fileName]
-      ?..sink
-      ..add(
-        true,
-      );
-    await _loadImageTask[fileName]?.close();
+      ?.complete(true);
     _loadImageTask.remove(fileName);
   }
 

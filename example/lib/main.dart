@@ -53,18 +53,25 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Expanded(
-              child: ListView.builder(
-            itemCount: urls.length,
-            itemBuilder: (context, index) {
-              return RxImage.cacheNetwork(
-                url: urls[index],
-              );
-            },
-          ))
+      body: CustomScrollView(
+        slivers: [
+          SliverList(
+            key: UniqueKey(),
+            delegate: SliverChildBuilderDelegate(
+              childCount: urls.length,
+              (context, index) {
+                return AspectRatio(
+                  aspectRatio: 16 / 9,
+                  child: RxImage.cacheNetwork(
+                    key: ValueKey(urls[index]),
+                    url: urls[index],
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
+                );
+              },
+            ),
+          )
         ],
       ),
     );
@@ -94,6 +101,5 @@ const urls = [
   "https://images.pexels.com/photos/5738986/pexels-photo-5738986.jpeg?auto=compress&cs=tinysrgb&w=1200&lazy=load",
   "https://images.pexels.com/photos/19696637/pexels-photo-19696637.jpeg?auto=compress&cs=tinysrgb&w=1200&lazy=load",
   "https://images.pexels.com/photos/19540163/pexels-photo-19540163.jpeg?auto=compress&cs=tinysrgb&w=1200&lazy=load",
-  "https://www.pexels.com/th-th/photo/19154170/",
   "https://images.pexels.com/photos/19789102/pexels-photo-19789102.jpeg?auto=compress&cs=tinysrgb&w=1200&lazy=load"
 ];
