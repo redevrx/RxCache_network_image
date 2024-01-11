@@ -20,7 +20,7 @@ and the Flutter guide for
 ## Getting started
 
 ```dart
-rxcache_network_image: 0.0.5
+rxcache_network_image: 0.0.6
 ```
 
 ## Usage

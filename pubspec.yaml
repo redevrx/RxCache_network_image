@@ -1,6 +1,6 @@
 name: rxcache_network_image
 description: "Easy download image from network and show in widget with rxcacheNetworkImage fast load image from network"
-version: 0.0.5
+version: 0.0.6
 homepage: https://www.facebook.com/profile.php?id=100094077041664
 repository: https://github.com/redevrx/RxCache_network_image
 
@@ -13,6 +13,7 @@ dependencies:
     sdk: flutter
   http: ^1.1.2
   path_provider: ^2.1.1
+  flutter_image_compress: ^2.1.0
 
 dev_dependencies:
   flutter_test:

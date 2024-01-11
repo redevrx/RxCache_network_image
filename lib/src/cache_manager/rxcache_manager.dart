@@ -1,13 +1,15 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui' as img;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path_provider/path_provider.dart';
 
 mixin RxCacheManagerMixing {
   String get cacheFolder;
-  int _maxMemoryCache = 100 * 1024 * 1024;
+  int _maxMemoryCache = 16;
   String get memorySize;
   final Map<String, Uint8List> _cacheImages = {};
   final Map<String, StreamController<bool>> _loadImageTask = {};
@@ -32,6 +34,7 @@ mixin RxCacheManagerMixing {
   void setMemoryCache(int size);
   void setImageCache(String key, Uint8List bytes);
   Uint8List? getFormMemoryCache(String key);
+  int currentMemoryCacheSize();
 }
 
 class RxCacheManager with RxCacheManagerMixing {
@@ -121,10 +124,10 @@ class RxCacheManager with RxCacheManagerMixing {
   ) async {
     try {
       if (fileName.isEmpty) return;
-      final mFile = File("$cacheFolder/$fileName.bin");
+      final mFile = File("$cacheFolder/$fileName");
 
       ///exists file in disk
-      if (mFile.existsSync()) {
+      if (await mFile.exists()) {
         await _loadImageTask[fileName]?.close();
         _loadImageTask.remove(fileName);
         return;
@@ -150,13 +153,7 @@ class RxCacheManager with RxCacheManagerMixing {
       setImageCache(fileName, bytes);
 
       ///save file to dis
-      File("$cacheFolder/$fileName.bin").writeAsBytes(bytes).then((_) async {
-        _loadImageTask[fileName]
-          ?..sink
-          ..add(true);
-        await _loadImageTask[fileName]?.close();
-        _loadImageTask.remove(fileName);
-      });
+      resizeAndSave(fileName, mFile, bytes);
     } catch (_) {
       await _loadImageTask[fileName]?.close();
       _loadImageTask.remove(fileName);
@@ -178,16 +175,17 @@ class RxCacheManager with RxCacheManagerMixing {
         await _createCacheFolder();
       }
       final mKey = url == null ? key : Uri.parse(url).pathSegments.last;
-      mFile = File("$_cacheFolder/$mKey.bin");
+      mFile = File("$_cacheFolder/$mKey");
 
       ///check exit in memory
       if (_cacheImages.containsKey(mKey)) {
         mFile = File.fromRawPath(_cacheImages[mKey]!);
       } else {
-        if (!mFile.existsSync()) {
+        if (!await mFile.exists()) {
           mFile = null;
         } else {
-          setImageCache(mKey ?? '', mFile.readAsBytesSync());
+          final bytes = await mFile.readAsBytes();
+          setImageCache(mKey ?? '', bytes);
         }
       }
     } catch (_, __) {
@@ -221,7 +219,7 @@ class RxCacheManager with RxCacheManagerMixing {
   }) async {
     final Uri resolved = Uri.base.resolve(url ?? '');
     final fileName = key ?? resolved.pathSegments.lastOrNull;
-    final mFile = File("$cacheFolder/$fileName.bin");
+    final mFile = File("$cacheFolder/$fileName");
     if (url == null) return null;
 
     try {
@@ -235,8 +233,14 @@ class RxCacheManager with RxCacheManagerMixing {
         }
       }
 
-      if (mFile.existsSync()) {
-        return await mFile.readAsBytes();
+      if (await mFile.exists()) {
+        final fileBytes = getFormMemoryCache(fileName ?? '');
+        if (fileBytes != null) {
+          return fileBytes;
+        } else {
+          final bytes = await mFile.readAsBytes();
+          return bytes;
+        }
       }
 
       _loadImageTask[fileName ?? ''] = StreamController();
@@ -261,27 +265,40 @@ class RxCacheManager with RxCacheManagerMixing {
       setImageCache(fileName ?? '', bytes);
 
       ///save file to disk
-      mFile.writeAsBytes(bytes).then((_) async {
-        _loadImageTask[fileName]
-          ?..sink
-          ..add(
-            true,
-          );
-        await _loadImageTask[fileName]?.close();
-        _loadImageTask.remove(fileName);
-      });
+      resizeAndSave(fileName ?? '', mFile, bytes);
 
       return bytes;
     } catch (_) {
       await _loadImageTask[fileName]?.close();
       _loadImageTask.remove(fileName);
-      return getFormMemoryCache(fileName ?? '');
+      final bytes = getFormMemoryCache(fileName ?? '');
+
+      return bytes;
     }
+  }
+
+  void resizeAndSave(String fileName, File filePath, Uint8List bytes) async {
+    img.decodeImageFromList(bytes, (image) async {
+      if (image.width <= 1920 && image.height <= 1080) return;
+
+      /// Resize the image to Full HD (1920x1080)
+      final Uint8List compressedBytes =
+          await FlutterImageCompress.compressWithList(bytes, quality: 80);
+
+      await filePath.writeAsBytes(compressedBytes);
+      _loadImageTask[fileName]
+        ?..sink
+        ..add(
+          true,
+        );
+      await _loadImageTask[fileName]?.close();
+      _loadImageTask.remove(fileName);
+    });
   }
 
   @override
   void setMemoryCache(int size) {
-    if (size < 10) return;
+    if (size <= 1) return;
     _maxMemoryCache = size;
   }
 
@@ -290,35 +307,13 @@ class RxCacheManager with RxCacheManagerMixing {
 
   @override
   void setImageCache(String key, Uint8List bytes) {
-    final currentSize = _calculateSizeOf(_cacheImages);
-    if (currentSize >= _maxMemoryCache) {
+    if (_cacheImages.length >= _maxMemoryCache) {
       _cacheImages.clear();
     }
 
     if (!_cacheImages.containsKey(key)) {
       _cacheImages[key] = bytes;
     }
-  }
-
-  int _calculateSizeOf(dynamic value) {
-    if (value == null) {
-      return 0;
-    }
-    if (value is Map) {
-      int size = 0;
-      for (var entry in value.entries) {
-        size += _calculateSizeOf(entry.key) + _calculateSizeOf(entry.value);
-      }
-      return size;
-    }
-    if (value is Iterable) {
-      return value.fold(
-          0, (int size, dynamic element) => size + _calculateSizeOf(element));
-    }
-    if (value is String) {
-      return value.length * 2;
-    }
-    return 1;
   }
 
   @override
@@ -334,4 +329,7 @@ class RxCacheManager with RxCacheManagerMixing {
 
     return null;
   }
+
+  @override
+  int currentMemoryCacheSize() => _cacheImages.length;
 }

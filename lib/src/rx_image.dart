@@ -1,7 +1,4 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:rxcache_network_image/rxcache_network_image.dart';
 
 class RxImage extends StatefulWidget {
@@ -18,7 +15,6 @@ class RxImage extends StatefulWidget {
     this.fit,
     this.color,
     this.gaplessPlayback = false,
-    this.loadingBuilder,
     this.errorBuilder,
     this.opacity,
     this.colorBlendMode,
@@ -30,69 +26,10 @@ class RxImage extends StatefulWidget {
     this.isAntiAlias = false,
     this.excludeFromSemantics = false,
     this.semanticLabel,
-    this.frameBuilder,
   });
 
   /// The image to display.
   final ImageProvider image;
-
-  /// A builder function responsible for creating the widget that represents
-  /// this image.
-  ///
-  /// If this is null, this widget will display an image that is painted as
-  /// soon as the first image frame is available (and will appear to "pop" in
-  /// if it becomes available asynchronously). Callers might use this builder to
-  /// add effects to the image (such as fading the image in when it becomes
-  /// available) or to display a placeholder widget while the image is loading.
-  ///
-  /// To have finer-grained control over the way that an image's loading
-  /// progress is communicated to the user, see [loadingBuilder].
-  ///
-  /// ## Chaining with [loadingBuilder]
-  ///
-  /// If a [loadingBuilder] has _also_ been specified for an image, the two
-  /// builders will be chained together: the _result_ of this builder will
-  /// be passed as the `child` argument to the [loadingBuilder]. For example,
-  /// consider the following builders used in conjunction:
-  ///
-  /// {@template flutter.widgets.Image.frameBuilder.chainedBuildersExample}
-  /// ```dart
-  /// Image(
-  ///   image: _image,
-  ///   frameBuilder: (BuildContext context, Widget child, int? frame, bool? wasSynchronouslyLoaded) {
-  ///     return Padding(
-  ///       padding: const EdgeInsets.all(8.0),
-  ///       child: child,
-  ///     );
-  ///   },
-  ///   loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
-  ///     return Center(child: child);
-  ///   },
-  /// )
-  /// ```
-  ///
-  /// In this example, the widget hierarchy will contain the following:
-  ///
-  /// ```dart
-  /// Center(
-  ///   child: Padding(
-  ///     padding: const EdgeInsets.all(8.0),
-  ///     child: image,
-  ///   ),
-  /// ),
-  /// ```
-  /// {@endtemplate}
-  ///
-  /// {@tool dartpad}
-  /// The following sample demonstrates how to use this builder to implement an
-  /// image that fades in once it's been loaded.
-  ///
-  /// This sample contains a limited subset of the functionality that the
-  /// [FadeInImage] widget provides out of the box.
-  ///
-  /// ** See code in examples/api/lib/widgets/image/image.frame_builder.0.dart **
-  /// {@end-tool}
-  final ImageFrameBuilder? frameBuilder;
 
   /// Optional headers for the http request of the image url
   final Map<String, String>? httpHeaders;
@@ -163,49 +100,6 @@ class RxImage extends StatefulWidget {
   /// relationship. With [gaplessPlayback] on you might accidentally break this
   /// expectation and re-use the old widget.
   final bool gaplessPlayback;
-
-  /// A builder that specifies the widget to display to the user while an image
-  /// is still loading.
-  ///
-  /// If this is null, and the image is loaded incrementally (e.g. over a
-  /// network), the user will receive no indication of the progress as the
-  /// bytes of the image are loaded.
-  ///
-  /// For more information on how to interpret the arguments that are passed to
-  /// this builder, see the documentation on [ImageLoadingBuilder].
-  ///
-  /// ## Performance implications
-  ///
-  /// If a [loadingBuilder] is specified for an image, the [Image] widget is
-  /// likely to be rebuilt on every
-  /// [rendering pipeline frame](rendering/RendererBinding/drawFrame.html) until
-  /// the image has loaded. This is useful for cases such as displaying a loading
-  /// progress indicator, but for simpler cases such as displaying a placeholder
-  /// widget that doesn't depend on the loading progress (e.g. static "loading"
-  /// text), [frameBuilder] will likely work and not incur as much cost.
-  ///
-  /// ## Chaining with [frameBuilder]
-  ///
-  /// If a [frameBuilder] has _also_ been specified for an image, the two
-  /// builders will be chained together: the `child` argument to this
-  /// builder will contain the _result_ of the [frameBuilder]. For example,
-  /// consider the following builders used in conjunction:
-  ///
-  /// {@macro flutter.widgets.Image.frameBuilder.chainedBuildersExample}
-  ///
-  /// {@tool dartpad}
-  /// The following sample uses [loadingBuilder] to show a
-  /// [CircularProgressIndicator] while an image loads over the network.
-  ///
-  /// ** See code in examples/api/lib/widgets/image/image.loading_builder.0.dart **
-  /// {@end-tool}
-  ///
-  /// Run against a real-world image on a slow network, the previous example
-  /// renders the following loading progress indicator while the image loads
-  /// before rendering the completed image.
-  ///
-  /// {@animation 400 400 https://flutter.github.io/assets-for-api-docs/assets/widgets/loading_progress_image.mp4}
-  final ImageLoadingBuilder? loadingBuilder;
 
   /// A builder function that is called if an error occurs during image loading.
   ///
@@ -290,7 +184,7 @@ class RxImage extends StatefulWidget {
   ///    specify an [AlignmentGeometry].
   ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
   ///    relative to text direction.
-  final AlignmentGeometry alignment;
+  final Alignment alignment;
 
   /// How to paint any portions of the layout bounds not covered by the image.
   final ImageRepeat repeat;
@@ -353,7 +247,6 @@ class RxImage extends StatefulWidget {
     this.fit,
     this.color,
     this.gaplessPlayback = false,
-    this.loadingBuilder,
     this.errorBuilder,
     this.opacity,
     this.colorBlendMode,
@@ -365,7 +258,6 @@ class RxImage extends StatefulWidget {
     this.isAntiAlias = false,
     this.excludeFromSemantics = false,
     this.semanticLabel,
-    this.frameBuilder,
   })  : image = ResizeImage.resizeIfNeeded(
             cacheWidth,
             cacheHeight,
@@ -388,333 +280,68 @@ class RxImage extends StatefulWidget {
   State<RxImage> createState() => _RxImageState();
 }
 
-class _RxImageState extends State<RxImage> with WidgetsBindingObserver {
-  ImageStream? _imageStream;
-  ImageInfo? _imageInfo;
-  ImageChunkEvent? _loadingProgress;
-  bool _isListeningToStream = false;
-  late bool _invertColors;
-  int? _frameNumber;
-  bool _wasSynchronouslyLoaded = false;
-  late DisposableBuildContext<State<RxImage>> _scrollAwareContext;
-  Object? _lastException;
-  StackTrace? _lastStack;
-  ImageStreamCompleterHandle? _completerHandle;
+class _RxImageState extends State<RxImage> {
+  late Image _image;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    _scrollAwareContext = DisposableBuildContext<State<RxImage>>(this);
+    _image = Image(
+      image: widget.image,
+      color: widget.color,
+      fit: widget.fit,
+      height: widget.height,
+      width: widget.width,
+      key: widget.key,
+      alignment: widget.alignment,
+      colorBlendMode: widget.colorBlendMode,
+      errorBuilder: widget.errorBuilder,
+      filterQuality: widget.filterQuality,
+      gaplessPlayback: widget.gaplessPlayback,
+      matchTextDirection: widget.matchTextDirection,
+      repeat: widget.repeat,
+      semanticLabel: widget.semanticLabel,
+      isAntiAlias: widget.isAntiAlias,
+      opacity: widget.opacity,
+      excludeFromSemantics: widget.excludeFromSemantics,
+      centerSlice: widget.centerSlice,
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant RxImage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.image != widget.image) {
+      _image = Image(
+        image: widget.image,
+        color: widget.color,
+        fit: widget.fit,
+        height: widget.height,
+        width: widget.width,
+        key: widget.key,
+        alignment: widget.alignment,
+        colorBlendMode: widget.colorBlendMode,
+        errorBuilder: widget.errorBuilder,
+        filterQuality: widget.filterQuality,
+        gaplessPlayback: widget.gaplessPlayback,
+        matchTextDirection: widget.matchTextDirection,
+        repeat: widget.repeat,
+        semanticLabel: widget.semanticLabel,
+        isAntiAlias: widget.isAntiAlias,
+        opacity: widget.opacity,
+        excludeFromSemantics: widget.excludeFromSemantics,
+        centerSlice: widget.centerSlice,
+      );
+    }
   }
 
   @override
   void dispose() {
-    assert(_imageStream != null);
-    WidgetsBinding.instance.removeObserver(this);
-    _stopListeningToStream();
-    _completerHandle?.dispose();
-    _scrollAwareContext.dispose();
-    _replaceImage(info: null);
     super.dispose();
   }
 
   @override
-  void didChangeDependencies() {
-    _updateInvertColors();
-    _resolveImage();
-
-    if (TickerMode.of(context)) {
-      _listenToStream();
-    } else {
-      _stopListeningToStream(keepStreamAlive: true);
-    }
-
-    super.didChangeDependencies();
-  }
-
-  @override
-  void didUpdateWidget(RxImage oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (_isListeningToStream &&
-        (widget.loadingBuilder == null) != (oldWidget.loadingBuilder == null)) {
-      final ImageStreamListener oldListener = _getListener();
-      _imageStream!.addListener(_getListener(recreateListener: true));
-      _imageStream!.removeListener(oldListener);
-    }
-    if (widget.image != oldWidget.image) {
-      _resolveImage();
-    }
-  }
-
-  @override
-  void didChangeAccessibilityFeatures() {
-    super.didChangeAccessibilityFeatures();
-    setState(() {
-      _updateInvertColors();
-    });
-  }
-
-  @override
-  void reassemble() {
-    _resolveImage(); // in case the image cache was flushed
-    super.reassemble();
-  }
-
-  void _updateInvertColors() {
-    _invertColors = MediaQuery.maybeInvertColorsOf(context) ??
-        SemanticsBinding.instance.accessibilityFeatures.invertColors;
-  }
-
-  void _resolveImage() {
-    final ScrollAwareImageProvider provider = ScrollAwareImageProvider<Object>(
-      context: _scrollAwareContext,
-      imageProvider: widget.image,
-    );
-    final ImageStream newStream =
-        provider.resolve(createLocalImageConfiguration(
-      context,
-      size: widget.width != null && widget.height != null
-          ? Size(widget.width!, widget.height!)
-          : null,
-    ));
-    _updateSourceStream(newStream);
-  }
-
-  ImageStreamListener? _imageStreamListener;
-  ImageStreamListener _getListener({bool recreateListener = false}) {
-    if (_imageStreamListener == null || recreateListener) {
-      _lastException = null;
-      _lastStack = null;
-      _imageStreamListener = ImageStreamListener(
-        _handleImageFrame,
-        onChunk: widget.loadingBuilder == null ? null : _handleImageChunk,
-        onError: widget.errorBuilder != null || kDebugMode
-            ? (Object error, StackTrace? stackTrace) {
-                setState(() {
-                  _lastException = error;
-                  _lastStack = stackTrace;
-                });
-                assert(() {
-                  if (widget.errorBuilder == null) {
-                    // ignore: only_throw_errors, since we're just proxying the error.
-                    throw error; // Ensures the error message is printed to the console.
-                  }
-                  return true;
-                }());
-              }
-            : null,
-      );
-    }
-    return _imageStreamListener!;
-  }
-
-  void _handleImageFrame(ImageInfo imageInfo, bool synchronousCall) {
-    setState(() {
-      _replaceImage(info: imageInfo);
-      _loadingProgress = null;
-      _lastException = null;
-      _lastStack = null;
-      _frameNumber = _frameNumber == null ? 0 : _frameNumber! + 1;
-      _wasSynchronouslyLoaded = _wasSynchronouslyLoaded | synchronousCall;
-    });
-  }
-
-  void _handleImageChunk(ImageChunkEvent event) {
-    assert(widget.loadingBuilder != null);
-    setState(() {
-      _loadingProgress = event;
-      _lastException = null;
-      _lastStack = null;
-    });
-  }
-
-  void _replaceImage({required ImageInfo? info}) {
-    final ImageInfo? oldImageInfo = _imageInfo;
-    SchedulerBinding.instance
-        .addPostFrameCallback((_) => oldImageInfo?.dispose());
-    _imageInfo = info;
-  }
-
-  // Updates _imageStream to newStream, and moves the stream listener
-  // registration from the old stream to the new stream (if a listener was
-  // registered).
-  void _updateSourceStream(ImageStream newStream) {
-    if (_imageStream?.key == newStream.key) {
-      return;
-    }
-
-    if (_isListeningToStream) {
-      _imageStream!.removeListener(_getListener());
-    }
-
-    if (!widget.gaplessPlayback) {
-      setState(() {
-        _replaceImage(info: null);
-      });
-    }
-
-    setState(() {
-      _loadingProgress = null;
-      _frameNumber = null;
-      _wasSynchronouslyLoaded = false;
-    });
-
-    _imageStream = newStream;
-    if (_isListeningToStream) {
-      _imageStream!.addListener(_getListener());
-    }
-  }
-
-  void _listenToStream() {
-    if (_isListeningToStream) {
-      return;
-    }
-
-    _imageStream!.addListener(_getListener());
-    _completerHandle?.dispose();
-    _completerHandle = null;
-
-    _isListeningToStream = true;
-  }
-
-  /// Stops listening to the image stream, if this state object has attached a
-  /// listener.
-  ///
-  /// If the listener from this state is the last listener on the stream, the
-  /// stream will be disposed. To keep the stream alive, set `keepStreamAlive`
-  /// to true, which create [ImageStreamCompleterHandle] to keep the completer
-  /// alive and is compatible with the [TickerMode] being off.
-  void _stopListeningToStream({bool keepStreamAlive = false}) {
-    if (!_isListeningToStream) {
-      return;
-    }
-
-    if (keepStreamAlive &&
-        _completerHandle == null &&
-        _imageStream?.completer != null) {
-      _completerHandle = _imageStream!.completer!.keepAlive();
-    }
-
-    _imageStream!.removeListener(_getListener());
-    _isListeningToStream = false;
-  }
-
-  Widget _debugBuildErrorWidget(BuildContext context, Object error) {
-    return Stack(
-      alignment: Alignment.center,
-      children: <Widget>[
-        const Positioned.fill(
-          child: Placeholder(
-            color: Color(0xCF8D021F),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(4.0),
-          child: FittedBox(
-            child: Text(
-              '$error',
-              textAlign: TextAlign.center,
-              textDirection: TextDirection.ltr,
-              style: const TextStyle(
-                shadows: <Shadow>[
-                  Shadow(blurRadius: 1.0),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (_lastException != null) {
-      if (widget.errorBuilder != null) {
-        return widget.errorBuilder!(context, _lastException!, _lastStack);
-      }
-      if (kDebugMode) {
-        return _debugBuildErrorWidget(context, _lastException!);
-      }
-    }
-
-    Widget result = RawImage(
-      // Do not clone the image, because RawImage is a stateless wrapper.
-      // The image will be disposed by this state object when it is not needed
-      // anymore, such as when it is unmounted or when the image stream pushes
-      // a new image.
-      image: _imageInfo?.image,
-      debugImageLabel: _imageInfo?.debugLabel,
-      width: widget.width,
-      height: widget.height,
-      scale: _imageInfo?.scale ?? 1.0,
-      color: widget.color,
-      opacity: widget.opacity,
-      colorBlendMode: widget.colorBlendMode,
-      fit: widget.fit,
-      alignment: widget.alignment,
-      repeat: widget.repeat,
-      centerSlice: widget.centerSlice,
-      matchTextDirection: widget.matchTextDirection,
-      invertColors: _invertColors,
-      isAntiAlias: widget.isAntiAlias,
-      filterQuality: widget.filterQuality,
-    );
-
-    if (!widget.excludeFromSemantics) {
-      result = Semantics(
-        container: widget.semanticLabel != null,
-        image: true,
-        label: widget.semanticLabel ?? '',
-        child: result,
-      );
-    }
-
-    if (widget.frameBuilder != null) {
-      result = widget.frameBuilder!(
-          context, result, _frameNumber, _wasSynchronouslyLoaded);
-    }
-
-    if (widget.loadingBuilder != null) {
-      result = widget.loadingBuilder!(context, result, _loadingProgress);
-    }
-
-    // return Image(
-    //   image: widget.image,
-    //   opacity: widget.opacity,
-    //   color: widget.color,
-    //   fit: widget.fit,
-    //   height: widget.height,
-    //   width: widget.width,
-    //   key: widget.key,
-    //   alignment: widget.alignment,
-    //   centerSlice: widget.centerSlice,
-    //   colorBlendMode: widget.colorBlendMode,
-    //   errorBuilder: widget.errorBuilder,
-    //   excludeFromSemantics: widget.excludeFromSemantics,
-    //   filterQuality: widget.filterQuality,
-    //   frameBuilder: widget.frameBuilder,
-    //   gaplessPlayback: widget.gaplessPlayback,
-    //   isAntiAlias: widget.isAntiAlias,
-    //   loadingBuilder: widget.loadingBuilder,
-    //   matchTextDirection: widget.matchTextDirection,
-    //   repeat: widget.repeat,
-    //   semanticLabel: widget.semanticLabel,
-    // );
-
-    return result;
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(DiagnosticsProperty<ImageStream>('stream', _imageStream));
-    description.add(DiagnosticsProperty<ImageInfo>('pixels', _imageInfo));
-    description.add(DiagnosticsProperty<ImageChunkEvent>(
-        'loadingProgress', _loadingProgress));
-    description.add(DiagnosticsProperty<int>('frameNumber', _frameNumber));
-    description.add(DiagnosticsProperty<bool>(
-        'wasSynchronouslyLoaded', _wasSynchronouslyLoaded));
+    return _image;
   }
 }
