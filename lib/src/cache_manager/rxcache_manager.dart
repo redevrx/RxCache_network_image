@@ -1,10 +1,8 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:ui' as img;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path_provider/path_provider.dart';
 
 mixin RxCacheManagerMixing {
@@ -278,22 +276,14 @@ class RxCacheManager with RxCacheManagerMixing {
   }
 
   void resizeAndSave(String fileName, File filePath, Uint8List bytes) async {
-    img.decodeImageFromList(bytes, (image) async {
-      if (image.width <= 1920 && image.height <= 1080) return;
-
-      /// Resize the image to Full HD (1920x1080)
-      final Uint8List compressedBytes =
-          await FlutterImageCompress.compressWithList(bytes, quality: 80);
-
-      await filePath.writeAsBytes(compressedBytes);
-      _loadImageTask[fileName]
-        ?..sink
-        ..add(
-          true,
-        );
-      await _loadImageTask[fileName]?.close();
-      _loadImageTask.remove(fileName);
-    });
+    await filePath.writeAsBytes(bytes);
+    _loadImageTask[fileName]
+      ?..sink
+      ..add(
+        true,
+      );
+    await _loadImageTask[fileName]?.close();
+    _loadImageTask.remove(fileName);
   }
 
   @override

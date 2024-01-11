@@ -1,3 +1,5 @@
+## 1.0.0
+ - add Fade in image
 ## 0.0.6
  - Update Performance Load Image
 ## 0.0.5

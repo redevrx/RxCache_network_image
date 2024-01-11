@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:rxcache_network_image/rxcache_network_image.dart';
+import 'package:rxcache_network_image/src/fade_widget.dart';
 
 class RxImage extends StatefulWidget {
   const RxImage({
@@ -13,6 +14,7 @@ class RxImage extends StatefulWidget {
     this.width,
     this.height,
     this.fit,
+    this.placeholderFit,
     this.color,
     this.gaplessPlayback = false,
     this.errorBuilder,
@@ -67,6 +69,11 @@ class RxImage extends StatefulWidget {
   /// The default varies based on the other fields. See the discussion at
   /// [paintImage].
   final BoxFit? fit;
+
+  /// How to inscribe the placeholder image into the space allocated during layout.
+  ///
+  /// If not value set, it will fallback to [fit].
+  final BoxFit? placeholderFit;
 
   /// If non-null, this color is blended with each image pixel using [colorBlendMode].
   final Color? color;
@@ -245,6 +252,7 @@ class RxImage extends StatefulWidget {
     this.width,
     this.height,
     this.fit,
+    this.placeholderFit,
     this.color,
     this.gaplessPlayback = false,
     this.errorBuilder,
@@ -285,14 +293,13 @@ class _RxImageState extends State<RxImage> {
 
   @override
   void initState() {
-    super.initState();
     _image = Image(
       image: widget.image,
       color: widget.color,
       fit: widget.fit,
       height: widget.height,
       width: widget.width,
-      key: widget.key,
+      key: ValueKey(widget.image),
       alignment: widget.alignment,
       colorBlendMode: widget.colorBlendMode,
       errorBuilder: widget.errorBuilder,
@@ -305,12 +312,19 @@ class _RxImageState extends State<RxImage> {
       opacity: widget.opacity,
       excludeFromSemantics: widget.excludeFromSemantics,
       centerSlice: widget.centerSlice,
+      frameBuilder: loadFrameBuilder,
     );
+    super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    precacheImage(widget.image, context);
+    super.didChangeDependencies();
   }
 
   @override
   void didUpdateWidget(covariant RxImage oldWidget) {
-    super.didUpdateWidget(oldWidget);
     if (oldWidget.image != widget.image) {
       _image = Image(
         image: widget.image,
@@ -318,7 +332,7 @@ class _RxImageState extends State<RxImage> {
         fit: widget.fit,
         height: widget.height,
         width: widget.width,
-        key: widget.key,
+        key: ValueKey(widget.image),
         alignment: widget.alignment,
         colorBlendMode: widget.colorBlendMode,
         errorBuilder: widget.errorBuilder,
@@ -331,13 +345,22 @@ class _RxImageState extends State<RxImage> {
         opacity: widget.opacity,
         excludeFromSemantics: widget.excludeFromSemantics,
         centerSlice: widget.centerSlice,
+        frameBuilder: loadFrameBuilder,
       );
     }
+    super.didUpdateWidget(oldWidget);
   }
 
-  @override
-  void dispose() {
-    super.dispose();
+  Widget loadFrameBuilder(
+    BuildContext context,
+    Widget child,
+    int? frame,
+    bool wasSynchronouslyLoaded,
+  ) {
+    if (wasSynchronouslyLoaded) {
+      return child;
+    }
+    return FadeWidget(child: child);
   }
 
   @override
