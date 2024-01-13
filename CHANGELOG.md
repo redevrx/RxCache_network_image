@@ -1,3 +1,9 @@
+## 1.0.2
+ - Add RxHeroImage
+ - Add Retry Load Image
+ - Add download with http
+ - Add Default Download Image with HttpClient
+ - Update Performance
 ## 1.0.1
  - Add Custom Cache Manager
  - Fix Performance

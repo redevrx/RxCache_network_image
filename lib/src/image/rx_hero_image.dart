@@ -1,46 +1,45 @@
-import 'package:flutter/cupertino.dart';
-import 'package:rxcache_network_image/rxcache_network_image.dart';
-import 'package:rxcache_network_image/src/cache_manager/rx_cache_manager_mixing.dart';
-import 'package:rxcache_network_image/src/image/rx_hero_image.dart';
+import 'package:flutter/material.dart';
+import 'package:rxcache_network_image/src/image/fade_widget.dart';
 
-class RxImage extends StatefulWidget {
-  const RxImage({
+import '../cache_manager/rx_cache_manager_mixing.dart';
+
+class RxHeroImage extends StatefulWidget {
+  RxHeroImage({
     super.key,
-    required this.image,
+    required ImageProvider image,
     required this.imageUrl,
-    this.cacheManager,
+    required this.cacheManager,
     this.cacheKey,
     this.errorListener,
     this.width,
     this.height,
     this.fit,
-    this.placeholderFit,
     this.color,
-    this.gaplessPlayback = false,
+    required this.gaplessPlayback,
     this.errorBuilder,
     this.opacity,
+    required this.filterQuality,
     this.colorBlendMode,
-    this.filterQuality = FilterQuality.low,
-    this.alignment = Alignment.center,
-    this.repeat = ImageRepeat.noRepeat,
-    this.matchTextDirection = false,
+    required this.alignment,
+    required this.repeat,
     this.centerSlice,
-    this.isAntiAlias = false,
-    this.excludeFromSemantics = false,
+    required this.matchTextDirection,
+    required this.isAntiAlias,
+    required this.excludeFromSemantics,
     this.semanticLabel,
     this.loadingBuilder,
-    this.cacheHeight,
-    this.cacheWidth,
-  });
+    int? cacheHeight,
+    int? cacheWidth,
+  }) : image = ResizeImage.resizeIfNeeded(cacheWidth, cacheHeight, image);
 
   /// The image to display.
-  final RxCacheImageProvider image;
+  final ImageProvider image;
 
   /// The target image that is displayed.
   final String imageUrl;
 
   /// Option to use cacheManager with other settings
-  final RxCacheManagerMixing? cacheManager;
+  final RxCacheManagerMixing cacheManager;
 
   /// The target image's cache key.
   final String? cacheKey;
@@ -69,11 +68,6 @@ class RxImage extends StatefulWidget {
   /// The default varies based on the other fields. See the discussion at
   /// [paintImage].
   final BoxFit? fit;
-
-  /// How to inscribe the placeholder image into the space allocated during layout.
-  ///
-  /// If not value set, it will fallback to [fit].
-  final BoxFit? placeholderFit;
 
   /// If non-null, this color is blended with each image pixel using [colorBlendMode].
   final Color? color;
@@ -240,90 +234,112 @@ class RxImage extends StatefulWidget {
   final String? semanticLabel;
 
   final ImageLoadingBuilder? loadingBuilder;
-  final int? cacheHeight;
-  final int? cacheWidth;
-
-  RxImage.cacheNetwork({
-    super.key,
-    required String? url,
-    Map<String, String>? headers,
-    this.cacheManager,
-    double scale = 1.0,
-    String? mCacheKey,
-    ValueChanged<Object>? mErrorListener,
-    this.width,
-    this.height,
-    this.fit,
-    this.placeholderFit,
-    this.color,
-    this.gaplessPlayback = false,
-    this.errorBuilder,
-    this.opacity,
-    this.colorBlendMode,
-    this.filterQuality = FilterQuality.low,
-    this.alignment = Alignment.center,
-    this.repeat = ImageRepeat.noRepeat,
-    this.matchTextDirection = false,
-    this.centerSlice,
-    this.isAntiAlias = false,
-    this.excludeFromSemantics = false,
-    this.semanticLabel,
-    this.loadingBuilder,
-    this.cacheHeight,
-    this.cacheWidth,
-  })  : image = RxCacheImageProvider(
-          url: url ?? '',
-          headers: headers,
-          cacheKey: mCacheKey,
-          cacheManager: cacheManager ?? RxCacheManager(),
-          errorListener: mErrorListener,
-          scale: scale,
-        ),
-        imageUrl = url ?? '',
-        cacheKey = mCacheKey,
-        errorListener = mErrorListener,
-        assert(cacheWidth == null || cacheWidth > 0),
-        assert(cacheHeight == null || cacheHeight > 0);
 
   @override
-  State<RxImage> createState() => _RxImageState();
+  State<RxHeroImage> createState() => _RxHeroImageState();
 }
 
-class _RxImageState extends State<RxImage> {
+class _RxHeroImageState extends State<RxHeroImage> {
+  late Image _image;
+  int retryCount = 0;
 
   @override
-  void didChangeDependencies() {
-   precacheImage(widget.image, context);
-    super.didChangeDependencies();
+  void initState() {
+    _image = Image(
+      image: widget.image,
+      color: widget.color,
+      fit: widget.fit,
+      height: widget.height,
+      width: widget.width,
+      key: ValueKey(widget.image),
+      alignment: widget.alignment,
+      colorBlendMode: widget.colorBlendMode,
+      errorBuilder: errorBuilder,
+      filterQuality: widget.filterQuality,
+      gaplessPlayback: widget.gaplessPlayback,
+      matchTextDirection: widget.matchTextDirection,
+      repeat: widget.repeat,
+      semanticLabel: widget.semanticLabel,
+      isAntiAlias: widget.isAntiAlias,
+      opacity: widget.opacity,
+      excludeFromSemantics: widget.excludeFromSemantics,
+      centerSlice: widget.centerSlice,
+      frameBuilder: loadFrameBuilder,
+      loadingBuilder: widget.loadingBuilder ?? loadingProgress,
+    );
+    super.initState();
+  }
+
+  Widget errorBuilder(context, error, stackTrace) {
+    if (widget.imageUrl.isNotEmpty) {
+      if (retryCount <= 0) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          setState(() {
+            retryCount += 1;
+          });
+        });
+      }
+    }
+
+    if (widget.errorBuilder != null) {
+      return widget.errorBuilder!(context, error, stackTrace);
+    }
+    return const SizedBox.shrink();
+  }
+
+  @override
+  void didUpdateWidget(covariant RxHeroImage oldWidget) {
+    if (oldWidget.image != widget.image) {
+      retryCount = 0;
+      _image = Image(
+        image: widget.image,
+        color: widget.color,
+        fit: widget.fit,
+        height: widget.height,
+        width: widget.width,
+        key: ValueKey(widget.image),
+        alignment: widget.alignment,
+        colorBlendMode: widget.colorBlendMode,
+        errorBuilder: errorBuilder,
+        filterQuality: widget.filterQuality,
+        gaplessPlayback: widget.gaplessPlayback,
+        matchTextDirection: widget.matchTextDirection,
+        repeat: widget.repeat,
+        semanticLabel: widget.semanticLabel,
+        isAntiAlias: widget.isAntiAlias,
+        opacity: widget.opacity,
+        excludeFromSemantics: widget.excludeFromSemantics,
+        centerSlice: widget.centerSlice,
+        frameBuilder: loadFrameBuilder,
+        loadingBuilder: widget.loadingBuilder ?? loadingProgress,
+      );
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  Widget loadingProgress(
+    BuildContext context,
+    Widget child,
+    ImageChunkEvent? loadingProgress,
+  ) {
+    return child;
+  }
+
+  Widget loadFrameBuilder(
+    BuildContext context,
+    Widget child,
+    int? frame,
+    bool wasSynchronouslyLoaded,
+  ) {
+    if (wasSynchronouslyLoaded) {
+      return child;
+    }
+
+    return FadeWidget(child: child);
   }
 
   @override
   Widget build(BuildContext context) {
-    return RxHeroImage(
-      image: widget.image,
-      imageUrl: widget.imageUrl,
-      cacheManager: RxCacheManager(),
-      gaplessPlayback: widget.gaplessPlayback,
-      filterQuality: widget.filterQuality,
-      alignment: widget.alignment,
-      repeat: widget.repeat,
-      matchTextDirection: widget.matchTextDirection,
-      isAntiAlias: widget.isAntiAlias,
-      excludeFromSemantics: widget.excludeFromSemantics,
-      height: widget.height,
-      width: widget.width,
-      loadingBuilder: widget.loadingBuilder,
-      errorBuilder: widget.errorBuilder,
-      fit: widget.fit,
-      centerSlice: widget.centerSlice,
-      opacity: widget.opacity,
-      semanticLabel: widget.semanticLabel,
-      cacheHeight: widget.cacheWidth,
-      cacheWidth: widget.cacheWidth,
-      colorBlendMode: widget.colorBlendMode,
-      color: widget.color,
-      cacheKey: widget.cacheKey,
-      errorListener: widget.errorListener,
-    );
+    return _image;
   }
 }

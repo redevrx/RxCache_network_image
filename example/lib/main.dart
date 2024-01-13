@@ -32,18 +32,18 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final cacheManager = RxCacheManager();
-  @override
-  void initState() {
-    ///preload and cache disk
-    for (final url in urls) {
-      cacheManager.download(url: url).then((value) => null);
-    }
-    super.initState();
-  }
+  final showList = ValueNotifier(true);
 
   @override
   void didChangeDependencies() async {
+    // await Future.wait(urls.map((e) => cacheManager.download(url: e)));
     super.didChangeDependencies();
+  }
+
+  @override
+  void dispose() {
+    showList.dispose();
+    super.dispose();
   }
 
   @override
@@ -55,25 +55,33 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: CustomScrollView(
         slivers: [
-          SliverList(
-            key: UniqueKey(),
-            delegate: SliverChildBuilderDelegate(
-              childCount: urls.length,
-              (context, index) {
-                return AspectRatio(
-                  aspectRatio: 16 / 9,
-                  child: RxImage.cacheNetwork(
-                    key: ValueKey(urls[index]),
-                    url: urls[index],
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  ),
-                );
-              },
-            ),
-          )
+          ValueListenableBuilder(
+            valueListenable: showList,
+            builder: (context, value, child) {
+              return value
+                  ? SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        childCount: urls.length,
+                        (context, index) {
+                          return AspectRatio(
+                            aspectRatio: 16 / 9,
+                            child: RxImage.cacheNetwork(
+                              url: urls[index],
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                            ),
+                          );
+                        },
+                      ),
+                    )
+                  : const SliverToBoxAdapter();
+            },
+          ),
         ],
       ),
+      floatingActionButton: FloatingActionButton.small(onPressed: () {
+        showList.value = !showList.value;
+      }),
     );
   }
 }
