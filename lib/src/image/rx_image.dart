@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:rxcache_network_image/rxcache_network_image.dart';
 import 'package:rxcache_network_image/src/cache_manager/rx_cache_manager_mixing.dart';
-import 'package:rxcache_network_image/src/image/rx_hero_image.dart';
 
 class RxImage extends StatefulWidget {
   const RxImage({
@@ -290,10 +289,9 @@ class RxImage extends StatefulWidget {
 }
 
 class _RxImageState extends State<RxImage> {
-
   @override
   void didChangeDependencies() {
-   precacheImage(widget.image, context);
+    precacheImage(widget.image, context);
     super.didChangeDependencies();
   }
 
