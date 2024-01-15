@@ -5,7 +5,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rxcache_network_image/src/cache_manager/rx_cache_manager_mixing.dart';
-import 'package:http/http.dart' as http;
 
 class BaseRxCacheManager implements RxCacheManagerMixing {
   final String _folder;
@@ -14,7 +13,6 @@ class BaseRxCacheManager implements RxCacheManagerMixing {
   }
 
   static const timeOut = Duration(minutes: 2);
-
   // Do not access this field directly; use [_httpClient] instead.
   // We set `autoUncompress` to false to ensure that we can trust the value of
   // the `Content-Length` HTTP header. We automatically uncompress the content
@@ -38,7 +36,7 @@ class BaseRxCacheManager implements RxCacheManagerMixing {
   final List<String> _loadImageTask = [];
 
   String? _cacheFolder;
-  int _maxMemoryCache = 16;
+  int _maxMemoryCache = 22;
 
   @override
   void clearCache() async {
@@ -70,9 +68,10 @@ class BaseRxCacheManager implements RxCacheManagerMixing {
     final fileName = key ?? Uri.parse(url).pathSegments.lastOrNull;
 
     ///check waiting download
-    if (!_loadImageTask.contains(fileName)) {
+    if (!_loadImageTask.contains(fileName ?? '')) {
+      ///first download in queue
       _loadImageTask.add(fileName ?? '');
-      return _download(fileName ?? '', url, headers, key);
+      return await _download(fileName ?? '', url, headers, key);
     }
 
     return;
@@ -80,12 +79,12 @@ class BaseRxCacheManager implements RxCacheManagerMixing {
 
   Future<void> _download(
     String fileName,
-    String url,
+    String? url,
     Map<String, String>? headers,
     String? key,
   ) async {
     try {
-      if (fileName.isEmpty) return;
+      if (fileName == "" || '$url'.length < 6) return;
       final mFile = File("$cacheFolder/$fileName");
 
       ///exists file in disk
@@ -94,21 +93,34 @@ class BaseRxCacheManager implements RxCacheManagerMixing {
         return;
       }
 
-      final Uri resolved = Uri.base.resolve(url);
-      final request = http.Request("GET", resolved);
-      request.headers.addAll(headers ?? {});
-      final response = await request.send();
+      final Uri resolved = Uri.base.resolve(url!);
 
+      final request = await _httpClient.getUrl(resolved);
+      headers?.forEach((String name, String value) {
+        request.headers.add(name, value);
+      });
+
+      final response = await request.close();
       if (response.statusCode != HttpStatus.ok) {
+        await response.drain<List<int>>(<int>[]);
         throw NetworkImageLoadException(
             statusCode: response.statusCode, uri: resolved);
       }
 
+      // final request = http.Request("GET", resolved);
+      // request.headers.addAll(headers ?? {});
+      // final response = await request.send();
+      //
+      // if (response.statusCode != HttpStatus.ok) {
+      //   throw NetworkImageLoadException(
+      //       statusCode: response.statusCode, uri: resolved);
+      // }
+
       final ioSink = mFile.openWrite();
       List<int> bytes = [];
-      await for (final byte in response.stream) {
-        ioSink.add(byte);
+      await for (final List<int> byte in response) {
         bytes.addAll(byte);
+        ioSink.add(byte);
       }
 
       setImageCache(fileName, Uint8List.fromList(bytes));
@@ -195,8 +207,7 @@ class BaseRxCacheManager implements RxCacheManagerMixing {
         return fileBytes;
       }
 
-      _loadImageTask.add(fileName ?? '');
-      final HttpClientRequest request = await _httpClient.getUrl(resolved);
+      final request = await _httpClient.getUrl(resolved);
       headers?.forEach((String name, String value) {
         request.headers.add(name, value);
       });
@@ -208,44 +219,53 @@ class BaseRxCacheManager implements RxCacheManagerMixing {
             statusCode: response.statusCode, uri: resolved);
       }
 
-      final total = response.contentLength;
-      final ioSink = mFile.openWrite();
       List<int> bytes = [];
-      await for (final List<int> byte in response) {
-        bytes.addAll(byte);
-        ioSink.add(byte);
+      int receiverBytes = 0;
+      if (!_loadImageTask.contains(fileName)) {
+        final total = response.contentLength;
+        await for (final List<int> byte in response) {
+          bytes.addAll(byte);
 
-        if (onBytesReceived != null) {
-          Future.forEach(byte, (element) {
-            onBytesReceived(element, total);
-          });
+          if (onBytesReceived != null) {
+            receiverBytes += byte.length;
+            final progress = ((receiverBytes / total) * 100).toInt();
+            onBytesReceived(progress, total);
+          }
         }
+      } else {
+        final total = response.contentLength;
+        final ioSink = mFile.openWrite();
+        await for (final List<int> byte in response) {
+          bytes.addAll(byte);
+          ioSink.add(byte);
+
+          if (onBytesReceived != null) {
+            receiverBytes += byte.length;
+            final progress = ((receiverBytes / total) * 100).toInt();
+            onBytesReceived(progress, total);
+          }
+        }
+
+        ///save file to disk
+        ioSink.close();
       }
 
       final mBytes = Uint8List.fromList(bytes);
 
       ///set to memory cache
       setImageCache(fileName ?? '', mBytes);
-
-      _loadImageTask.remove(fileName ?? '');
-
-      ///save file to disk
-      ioSink.close();
-
       return mBytes;
     } catch (_, __) {
-      debugPrintStack(label: '$_', stackTrace: __);
-      _loadImageTask.remove(fileName);
       final bytes = getFormMemoryCache(fileName ?? '');
 
       return bytes;
     }
   }
 
-  void resizeAndSave(String fileName, File filePath, List<int> bytes) {
-    _loadImageTask.remove(fileName);
-    filePath.writeAsBytes(bytes);
-  }
+  // void resizeAndSave(String fileName, File filePath, List<int> bytes) {
+  //   _loadImageTask.remove(fileName);
+  //   filePath.writeAsBytes(bytes);
+  // }
 
   @override
   void setMemoryCache(int size) {

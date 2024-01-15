@@ -1,3 +1,7 @@
+## 1.0.3
+ - Add Download Multi image (parallel)
+ - New default max memory cache
+ - Fix Performance
 ## 1.0.2
  - Add RxHeroImage
  - Add Retry Load Image

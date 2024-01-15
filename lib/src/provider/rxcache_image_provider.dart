@@ -123,7 +123,8 @@ class RxCacheImageProvider extends ImageProvider<RxCacheImageProvider> {
       }
 
       ///
-    } on Object {
+    } on Object catch (_, __) {
+      debugPrintStack(stackTrace: __, label: '$_');
       scheduleMicrotask(() {
         evict();
       });

@@ -322,6 +322,9 @@ class _RxHeroImageState extends State<RxHeroImage> {
     Widget child,
     ImageChunkEvent? loadingProgress,
   ) {
+    if (loadingProgress != null) {
+      return FadeWidget(child: child);
+    }
     return child;
   }
 

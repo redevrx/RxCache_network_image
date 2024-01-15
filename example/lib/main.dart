@@ -33,10 +33,17 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final cacheManager = RxCacheManager();
   final showList = ValueNotifier(true);
+  bool allowLoad = true;
+  final items = [
+    "https://images.pexels.com/photos/18280488/pexels-photo-18280488.jpeg?auto=compress&cs=tinysrgb&w=1200&lazy=load",
+    "https://images.pexels.com/photos/19564349/pexels-photo-19564349.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+  ];
 
   @override
   void didChangeDependencies() async {
-    // await Future.wait(urls.map((e) => cacheManager.download(url: e)));
+    for (var element in urls) {
+      cacheManager.download(url: element);
+    }
     super.didChangeDependencies();
   }
 
@@ -53,30 +60,47 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
       ),
-      body: CustomScrollView(
-        slivers: [
-          ValueListenableBuilder(
-            valueListenable: showList,
-            builder: (context, value, child) {
-              return value
-                  ? SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        childCount: urls.length,
-                        (context, index) {
-                          return AspectRatio(
-                            aspectRatio: 16 / 9,
-                            child: RxImage.cacheNetwork(
-                              url: urls[index],
-                              width: double.infinity,
-                              fit: BoxFit.cover,
-                            ),
-                          );
-                        },
-                      ),
-                    )
-                  : const SliverToBoxAdapter();
-            },
+      body: Column(
+        children: [
+          const SizedBox(
+            height: 30,
           ),
+          SizedBox(
+            height: 400,
+            width: double.infinity,
+            child: ValueListenableBuilder(
+              valueListenable: showList,
+              builder: (context, value, child) {
+                return value
+                    ? NotificationListener<ScrollNotification>(
+                        onNotification: (details) {
+                          if (details.metrics.pixels ==
+                              details.metrics.maxScrollExtent) {
+                            if (allowLoad) {
+                              loadMore();
+                            }
+                          }
+
+                          return true;
+                        },
+                        child: ListView.builder(
+                          itemCount: items.length,
+                          itemBuilder: (context, index) {
+                            return AspectRatio(
+                              aspectRatio: 16 / 9,
+                              child: RxImage.cacheNetwork(
+                                url: items[index],
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                              ),
+                            );
+                          },
+                        ),
+                      )
+                    : const SizedBox.shrink();
+              },
+            ),
+          )
         ],
       ),
       floatingActionButton: FloatingActionButton.small(onPressed: () {
@@ -84,11 +108,24 @@ class _MyHomePageState extends State<MyHomePage> {
       }),
     );
   }
+
+  void loadMore() async {
+    allowLoad = false;
+    await Future.delayed(const Duration(milliseconds: 750), () {
+      debugPrint("wait preload");
+    });
+
+    for (final url in urls) {
+      cacheManager.download(url: url);
+    }
+
+    setState(() {
+      items.addAll(urls);
+    });
+  }
 }
 
 const urls = [
-  "https://images.pexels.com/photos/18280488/pexels-photo-18280488.jpeg?auto=compress&cs=tinysrgb&w=1200&lazy=load",
-  "https://images.pexels.com/photos/19564349/pexels-photo-19564349.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
   "https://images.pexels.com/photos/19560944/pexels-photo-19560944.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
   "https://images.pexels.com/photos/17889085/pexels-photo-17889085.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
   "https://images.pexels.com/photos/19542480/pexels-photo-19542480.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
