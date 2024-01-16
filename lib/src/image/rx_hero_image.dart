@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:rxcache_network_image/src/image/fade_widget.dart';
 
 import '../cache_manager/rx_cache_manager_mixing.dart';
@@ -246,9 +247,10 @@ class _RxHeroImageState extends State<RxHeroImage> {
   Widget errorBuilder(context, error, stackTrace) {
     if (widget.imageUrl.isNotEmpty) {
       if (retryCount <= 0) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
+        SchedulerBinding.instance.addPostFrameCallback((_) {
           setState(() {
             retryCount += 1;
+            widget.image.evict();
           });
         });
       }

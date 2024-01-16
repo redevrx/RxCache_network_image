@@ -126,7 +126,7 @@ class BaseRxCacheManager implements RxCacheManagerMixing {
       setImageCache(fileName, Uint8List.fromList(bytes));
 
       ///save file to dis
-      ioSink.close();
+      await ioSink.close();
       _loadImageTask.remove(fileName);
     } catch (_, __) {
       _loadImageTask.remove(fileName);
@@ -229,7 +229,9 @@ class BaseRxCacheManager implements RxCacheManagerMixing {
           if (onBytesReceived != null) {
             receiverBytes += byte.length;
             final progress = ((receiverBytes / total) * 100).toInt();
-            onBytesReceived(progress, total);
+            if (progress >= 0) {
+              onBytesReceived(progress, total);
+            }
           }
         }
       } else {
@@ -242,7 +244,9 @@ class BaseRxCacheManager implements RxCacheManagerMixing {
           if (onBytesReceived != null) {
             receiverBytes += byte.length;
             final progress = ((receiverBytes / total) * 100).toInt();
-            onBytesReceived(progress, total);
+            if (progress >= 0) {
+              onBytesReceived(progress, total);
+            }
           }
         }
 

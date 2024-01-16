@@ -300,7 +300,6 @@ class _RxImageState extends State<RxImage> {
   @override
   Widget build(BuildContext context) {
     _image = RxHeroImage(
-      key: ValueKey(widget.image),
       image: widget.image,
       imageUrl: widget.imageUrl,
       cacheManager: RxCacheManager(),
