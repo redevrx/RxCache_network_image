@@ -243,33 +243,6 @@ class _RxHeroImageState extends State<RxHeroImage> {
   late Image _image;
   int retryCount = 0;
 
-  @override
-  void initState() {
-    _image = Image(
-      image: widget.image,
-      color: widget.color,
-      fit: widget.fit,
-      height: widget.height,
-      width: widget.width,
-      key: ValueKey(widget.image),
-      alignment: widget.alignment,
-      colorBlendMode: widget.colorBlendMode,
-      errorBuilder: errorBuilder,
-      filterQuality: widget.filterQuality,
-      gaplessPlayback: widget.gaplessPlayback,
-      matchTextDirection: widget.matchTextDirection,
-      repeat: widget.repeat,
-      semanticLabel: widget.semanticLabel,
-      isAntiAlias: widget.isAntiAlias,
-      opacity: widget.opacity,
-      excludeFromSemantics: widget.excludeFromSemantics,
-      centerSlice: widget.centerSlice,
-      frameBuilder: loadFrameBuilder,
-      loadingBuilder: widget.loadingBuilder ?? loadingProgress,
-    );
-    super.initState();
-  }
-
   Widget errorBuilder(context, error, stackTrace) {
     if (widget.imageUrl.isNotEmpty) {
       if (retryCount <= 0) {
@@ -343,6 +316,28 @@ class _RxHeroImageState extends State<RxHeroImage> {
 
   @override
   Widget build(BuildContext context) {
+    _image = Image(
+      image: widget.image,
+      color: widget.color,
+      fit: widget.fit,
+      height: widget.height,
+      width: widget.width,
+      key: ValueKey(widget.image),
+      alignment: widget.alignment,
+      colorBlendMode: widget.colorBlendMode,
+      errorBuilder: errorBuilder,
+      filterQuality: widget.filterQuality,
+      gaplessPlayback: widget.gaplessPlayback,
+      matchTextDirection: widget.matchTextDirection,
+      repeat: widget.repeat,
+      semanticLabel: widget.semanticLabel,
+      isAntiAlias: widget.isAntiAlias,
+      opacity: widget.opacity,
+      excludeFromSemantics: widget.excludeFromSemantics,
+      centerSlice: widget.centerSlice,
+      frameBuilder: loadFrameBuilder,
+      loadingBuilder: widget.loadingBuilder ?? loadingProgress,
+    );
     return _image;
   }
 }

@@ -292,8 +292,15 @@ class _RxImageState extends State<RxImage> {
   late RxHeroImage _image;
 
   @override
-  void initState() {
+  void didChangeDependencies() {
+    precacheImage(widget.image, context);
+    super.didChangeDependencies();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     _image = RxHeroImage(
+      key: ValueKey(widget.image),
       image: widget.image,
       imageUrl: widget.imageUrl,
       cacheManager: RxCacheManager(),
@@ -319,17 +326,6 @@ class _RxImageState extends State<RxImage> {
       cacheKey: widget.cacheKey,
       errorListener: widget.errorListener,
     );
-    super.initState();
-  }
-
-  @override
-  void didChangeDependencies() {
-    precacheImage(widget.image, context);
-    super.didChangeDependencies();
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return _image;
   }
 }

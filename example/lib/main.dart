@@ -66,7 +66,7 @@ class _MyHomePageState extends State<MyHomePage> {
             height: 30,
           ),
           SizedBox(
-            height: 400,
+            height: 600,
             width: double.infinity,
             child: ValueListenableBuilder(
               valueListenable: showList,
@@ -86,13 +86,11 @@ class _MyHomePageState extends State<MyHomePage> {
                         child: ListView.builder(
                           itemCount: items.length,
                           itemBuilder: (context, index) {
-                            return AspectRatio(
-                              aspectRatio: 16 / 9,
-                              child: RxImage.cacheNetwork(
-                                url: items[index],
-                                width: double.infinity,
-                                fit: BoxFit.cover,
-                              ),
+                            return RxImage.cacheNetwork(
+                              url: items[index],
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                              height: 300,
                             );
                           },
                         ),

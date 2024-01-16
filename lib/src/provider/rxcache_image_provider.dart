@@ -136,12 +136,13 @@ class RxCacheImageProvider extends ImageProvider<RxCacheImageProvider> {
 
   @override
   bool operator ==(Object other) {
-    if (other is RxCacheImageProvider) {
-      return ((cacheKey ?? url) == (other.cacheKey ?? other.url)) &&
-          scale == other.scale;
+    if (other.runtimeType != runtimeType) {
+      return false;
     }
-
-    return false;
+    return other is RxCacheImageProvider &&
+        other.url == url &&
+        other.cacheKey == cacheKey &&
+        other.scale == scale;
   }
 
   @override
