@@ -12,7 +12,6 @@ and the Flutter guide for
 -->
 
 ## Features
-
  - Cache Image in disk
  - Cache Image in memory
  - Preload image in RxCacheManager
@@ -22,6 +21,10 @@ and the Flutter guide for
 ```dart
 rxcache_network_image: 1.0.4
 ```
+
+## Issue
+หากใช้งานแล้วติดปัญหาสามารถเข้ามาสอบถามได้ที่เพจเฟส ได้เลยนะครับ
+<a href="https://www.facebook.com/profile.php?id=100094077041664" target="_blank">Facebook Page</a>
 
 ## Usage
 
