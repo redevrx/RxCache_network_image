@@ -1,3 +1,5 @@
+## 1.0.5
+ - Refactor Memory Cache
 ## 1.0.4
   - Fix Bugs
   - Fix Performance

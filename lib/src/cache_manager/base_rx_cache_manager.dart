@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
@@ -36,7 +37,7 @@ class BaseRxCacheManager implements RxCacheManagerMixing {
   final List<String> _loadImageTask = [];
 
   String? _cacheFolder;
-  int _maxMemoryCache = 22;
+  int _maxMemoryCache = 40;
 
   @override
   void clearCache() async {
@@ -221,7 +222,7 @@ class BaseRxCacheManager implements RxCacheManagerMixing {
 
       List<int> bytes = [];
       int receiverBytes = 0;
-      if (!_loadImageTask.contains(fileName)) {
+      if (_loadImageTask.contains(fileName)) {
         final total = response.contentLength;
         await for (final List<int> byte in response) {
           bytes.addAll(byte);
@@ -283,7 +284,9 @@ class BaseRxCacheManager implements RxCacheManagerMixing {
   @override
   void setImageCache(String key, Uint8List bytes) {
     if (_cacheImages.length >= _maxMemoryCache) {
-      _cacheImages.clear();
+      if (_cacheImages.isNotEmpty) {
+        _cacheImages.remove(_cacheImages.keys.last);
+      }
     }
 
     if (!_cacheImages.containsKey(key)) {
