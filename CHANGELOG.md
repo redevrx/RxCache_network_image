@@ -1,3 +1,6 @@
+## 1.0.4
+  - Fix Bugs
+  - Fix Performance
 ## 1.0.3
  - Add Download Multi image (parallel)
  - New default max memory cache
