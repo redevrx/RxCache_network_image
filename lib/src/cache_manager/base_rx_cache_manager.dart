@@ -37,7 +37,7 @@ class BaseRxCacheManager implements RxCacheManagerMixing {
   final List<String> _loadImageTask = [];
 
   String? _cacheFolder;
-  int _maxMemoryCache = 40;
+  int _maxMemoryCache = 26;
 
   @override
   void clearCache() async {
@@ -194,7 +194,6 @@ class BaseRxCacheManager implements RxCacheManagerMixing {
     final Uri resolved = Uri.base.resolve(url ?? '');
     final fileName = key ?? resolved.pathSegments.lastOrNull;
     final mFile = File("$cacheFolder/$fileName");
-    if (url == null) return null;
 
     try {
       ///

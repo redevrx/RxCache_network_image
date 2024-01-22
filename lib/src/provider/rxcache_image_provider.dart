@@ -71,6 +71,7 @@ class RxCacheImageProvider extends ImageProvider<RxCacheImageProvider> {
       RxCacheImageProvider key,
       StreamController<ImageChunkEvent> chunkEvents,
       ImageDecoderCallback decode) async* {
+    assert(url.length > 5, "invalid url");
     try {
       final mKeyCache = cacheKey ?? Uri.parse(url).pathSegments.last;
       if (cacheManager?.cacheFolder == null ||
@@ -81,9 +82,8 @@ class RxCacheImageProvider extends ImageProvider<RxCacheImageProvider> {
       ///get file from memory cache
       final memoryCacheByte = cacheManager?.getFormMemoryCache(mKeyCache);
       if (memoryCacheByte != null) {
-        final decoded = await decode(
-          await ImmutableBuffer.fromUint8List(memoryCacheByte),
-        );
+        final bytes = await ImmutableBuffer.fromUint8List(memoryCacheByte);
+        final decoded = await decode(bytes);
         yield decoded;
       }
 
@@ -124,7 +124,6 @@ class RxCacheImageProvider extends ImageProvider<RxCacheImageProvider> {
 
       ///
     } on Object catch (_, __) {
-      debugPrintStack(stackTrace: __, label: '$_');
       scheduleMicrotask(() {
         evict();
       });
