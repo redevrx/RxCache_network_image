@@ -1,3 +1,6 @@
+## 1.0.6
+- Fix LoadingBuilder not working
+- 
 ## 1.0.5
 
 - Refactor Memory Cache
