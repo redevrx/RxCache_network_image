@@ -9,11 +9,13 @@ import 'package:rxcache_network_image/src/cache_manager/rx_cache_manager_mixing.
 
 class BaseRxCacheManager implements RxCacheManagerMixing {
   final String _folder;
+
   BaseRxCacheManager({required String folder}) : _folder = folder {
     _createCacheFolder();
   }
 
   static const timeOut = Duration(minutes: 2);
+
   // Do not access this field directly; use [_httpClient] instead.
   // We set `autoUncompress` to false to ensure that we can trust the value of
   // the `Content-Length` HTTP header. We automatically uncompress the content

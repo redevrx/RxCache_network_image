@@ -251,9 +251,14 @@ class RxHeroImage extends StatelessWidget {
     Widget child,
     ImageChunkEvent? loadingProgress,
   ) {
+    if (loadingBuilder != null && loadingProgress != null) {
+      return loadingBuilder!(context, child, loadingProgress);
+    }
+
     if (loadingProgress != null) {
       return FadeWidget(child: child);
     }
+
     return child;
   }
 
@@ -292,7 +297,7 @@ class RxHeroImage extends StatelessWidget {
       excludeFromSemantics: excludeFromSemantics,
       centerSlice: centerSlice,
       frameBuilder: loadFrameBuilder,
-      loadingBuilder: loadingBuilder ?? loadingProgress,
+      loadingBuilder: loadingProgress,
     );
   }
 }

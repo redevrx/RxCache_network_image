@@ -12,9 +12,10 @@ and the Flutter guide for
 -->
 
 ## Features
- - Cache Image in disk
- - Cache Image in memory
- - Preload image in RxCacheManager
+
+- Cache Image in disk
+- Cache Image in memory
+- Preload image in RxCacheManager
 
 ## Getting started
 
@@ -23,6 +24,7 @@ rxcache_network_image: 1.0.5
 ```
 
 ## Issue
+
 หากใช้งานแล้วติดปัญหาสามารถเข้ามาสอบถามได้ที่เพจเฟส ได้เลยนะครับ
 <a href="https://www.facebook.com/profile.php?id=100094077041664" target="_blank">Facebook Page</a>
 
@@ -45,6 +47,7 @@ cacheManager.getFile()
 ```
 
 ## Create Custom CacheManager
+
 ```dart
 class CustomCacheManager extends BaseRxCacheManager {
   static CustomCacheManager? _instance;
@@ -59,6 +62,7 @@ class CustomCacheManager extends BaseRxCacheManager {
 ```
 
 ## Example
+
 ```dart
 class _MyHomePageState extends State<MyHomePage> {
   final cacheManager = RxCacheManager();
@@ -101,6 +105,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 ```
+
 ## Preview
 
 <img src="https://github.com/redevrx/RxCache_network_image/blob/main/assets/example_preview.gif?raw=true" width="350"  alt="Example Video App"/>

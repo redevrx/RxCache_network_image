@@ -222,6 +222,9 @@ class _MyHomePageState extends State<MyHomePage> {
                     return RxImage.cacheNetwork(
                       url: items[index],
                       fit: BoxFit.cover,
+                      loadingBuilder: (context, child, loadingProgress) {
+                        return const CircularProgressIndicator();
+                      },
                     );
                   } else {
                     return const Row(

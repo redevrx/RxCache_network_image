@@ -2,10 +2,10 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:rxcache_network_image/rxcache_network_image.dart';
-import 'package:flutter_test/flutter_test.dart';
 
 import 'rxcache_network_image_test.mocks.dart';
 
