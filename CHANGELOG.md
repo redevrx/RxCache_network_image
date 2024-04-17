@@ -1,4 +1,4 @@
-## 1.0.6
+## 1.0.7
 - Fix LoadingBuilder not working
 - 
 ## 1.0.5
