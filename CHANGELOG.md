@@ -1,6 +1,9 @@
+## 1.0.8
+- Fix Bug And update SDK
+
 ## 1.0.7
 - Fix LoadingBuilder not working
-- 
+
 ## 1.0.5
 
 - Refactor Memory Cache
