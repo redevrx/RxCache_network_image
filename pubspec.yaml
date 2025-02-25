@@ -5,20 +5,20 @@ homepage: https://www.facebook.com/profile.php?id=100094077041664
 repository: https://github.com/redevrx/RxCache_network_image
 
 environment:
-  sdk: '>=3.3.3 <4.0.0'
+  sdk: ^3.7.0
   flutter: ">=1.17.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  path_provider: ^2.1.1
+  path_provider: ^2.1.5
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.0
-  mockito: ^5.4.4
-  build_runner: ^2.4.8
+  flutter_lints: ^5.0.0
+  mockito: ^5.4.5
+  build_runner: ^2.4.15
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

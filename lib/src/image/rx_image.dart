@@ -270,19 +270,19 @@ class RxImage extends StatefulWidget {
     this.loadingBuilder,
     this.cacheHeight,
     this.cacheWidth,
-  })  : image = RxCacheImageProvider(
-          url: url ?? '',
-          headers: headers,
-          cacheKey: mCacheKey,
-          cacheManager: cacheManager ?? RxCacheManager(),
-          errorListener: mErrorListener,
-          scale: scale,
-        ),
-        imageUrl = url ?? '',
-        cacheKey = mCacheKey,
-        errorListener = mErrorListener,
-        assert(cacheWidth == null || cacheWidth > 0),
-        assert(cacheHeight == null || cacheHeight > 0);
+  }) : image = RxCacheImageProvider(
+         url: url ?? '',
+         headers: headers,
+         cacheKey: mCacheKey,
+         cacheManager: cacheManager ?? RxCacheManager(),
+         errorListener: mErrorListener,
+         scale: scale,
+       ),
+       imageUrl = url ?? '',
+       cacheKey = mCacheKey,
+       errorListener = mErrorListener,
+       assert(cacheWidth == null || cacheWidth > 0),
+       assert(cacheHeight == null || cacheHeight > 0);
 
   @override
   State<RxImage> createState() => _RxImageState();

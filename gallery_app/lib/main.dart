@@ -82,7 +82,6 @@ class _MyHomePageState extends State<MyHomePage> {
     if (page == 1) {
       final urls = [
         'https://farm4.staticflickr.com/3075/3168662394_7d7103de7d_z_d.jpg',
-        'https://farm2.staticflickr.com/1533/26541536141_41abe98db3_z_d.jpg',
         'https://i.imgur.com/CzXTtJV.jpg',
         "https://images.pexels.com/photos/16123335/pexels-photo-16123335.jpeg?auto=compress&cs=tinysrgb&w=1200&lazy=load",
         "https://images.pexels.com/photos/7345169/pexels-photo-7345169.jpeg?auto=compress&cs=tinysrgb&w=1200&lazy=load",
@@ -91,7 +90,7 @@ class _MyHomePageState extends State<MyHomePage> {
         "https://images.pexels.com/photos/5738986/pexels-photo-5738986.jpeg?auto=compress&cs=tinysrgb&w=1200&lazy=load",
         "https://images.pexels.com/photos/19696637/pexels-photo-19696637.jpeg?auto=compress&cs=tinysrgb&w=1200&lazy=load",
         "https://images.pexels.com/photos/19540163/pexels-photo-19540163.jpeg?auto=compress&cs=tinysrgb&w=1200&lazy=load",
-        "https://images.pexels.com/photos/19789102/pexels-photo-19789102.jpeg?auto=compress&cs=tinysrgb&w=1200&lazy=load"
+        "https://images.pexels.com/photos/19789102/pexels-photo-19789102.jpeg?auto=compress&cs=tinysrgb&w=1200&lazy=load",
       ];
 
       // await preload(urls);
@@ -190,9 +189,9 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(
           "Gallery App with RxImage",
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
         ),
         backgroundColor: Colors.blueAccent,
       ),
@@ -229,15 +228,13 @@ class _MyHomePageState extends State<MyHomePage> {
                   } else {
                     return const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        CircularProgressIndicator(),
-                      ],
+                      children: [CircularProgressIndicator()],
                     );
                   }
                 },
               ),
             ),
-          )
+          ),
         ],
       ),
     );

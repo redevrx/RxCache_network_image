@@ -3,7 +3,7 @@ import 'package:rxcache_network_image/src/cache_manager/base_rx_cache_manager.da
 class RxCacheManager extends BaseRxCacheManager {
   static RxCacheManager? _instance;
 
-  RxCacheManager._({String folder = "rx_image_cache"}) : super(folder: folder);
+  RxCacheManager._({super.folder = "rx_image_cache"});
 
   factory RxCacheManager({String folder = "rx_image_cache"}) {
     _instance ??= RxCacheManager._(folder: folder);

@@ -30,8 +30,8 @@ class FadeWidget extends StatefulWidget {
     this.duration = const Duration(milliseconds: 420),
     this.direction = AnimationDirection.forward,
     this.curve = Curves.easeOut,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<FadeWidget> createState() => _FadeWidgetState();
@@ -49,10 +49,7 @@ class _FadeWidgetState extends State<FadeWidget>
       return const SizedBox.shrink();
     }
 
-    return FadeTransition(
-      opacity: opacity,
-      child: widget.child,
-    );
+    return FadeTransition(opacity: opacity, child: widget.child);
   }
 
   @override
@@ -99,7 +96,8 @@ class _FadeWidgetState extends State<FadeWidget>
 
   void animationStatusChange(AnimationStatus status) {
     setState(() {
-      hideWidget = widget.direction == AnimationDirection.reverse &&
+      hideWidget =
+          widget.direction == AnimationDirection.reverse &&
           status == AnimationStatus.completed;
     });
   }

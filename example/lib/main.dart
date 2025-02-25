@@ -63,9 +63,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Column(
         children: [
-          const SizedBox(
-            height: 30,
-          ),
+          const SizedBox(height: 30),
           SizedBox(
             height: 600,
             width: double.infinity,
@@ -74,37 +72,39 @@ class _MyHomePageState extends State<MyHomePage> {
               builder: (context, value, child) {
                 return value
                     ? NotificationListener<ScrollNotification>(
-                        onNotification: (details) {
-                          if (details.metrics.pixels ==
-                              details.metrics.maxScrollExtent) {
-                            if (allowLoad) {
-                              loadMore();
-                            }
+                      onNotification: (details) {
+                        if (details.metrics.pixels ==
+                            details.metrics.maxScrollExtent) {
+                          if (allowLoad) {
+                            loadMore();
                           }
+                        }
 
-                          return true;
+                        return true;
+                      },
+                      child: ListView.builder(
+                        itemCount: items.length,
+                        itemBuilder: (context, index) {
+                          return RxImage.cacheNetwork(
+                            url: items[index],
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                            height: 300,
+                          );
                         },
-                        child: ListView.builder(
-                          itemCount: items.length,
-                          itemBuilder: (context, index) {
-                            return RxImage.cacheNetwork(
-                              url: items[index],
-                              width: double.infinity,
-                              fit: BoxFit.cover,
-                              height: 300,
-                            );
-                          },
-                        ),
-                      )
+                      ),
+                    )
                     : const SizedBox.shrink();
               },
             ),
-          )
+          ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.small(onPressed: () {
-        showList.value = !showList.value;
-      }),
+      floatingActionButton: FloatingActionButton.small(
+        onPressed: () {
+          showList.value = !showList.value;
+        },
+      ),
     );
   }
 
@@ -145,5 +145,5 @@ const urls = [
   "https://images.pexels.com/photos/5738986/pexels-photo-5738986.jpeg?auto=compress&cs=tinysrgb&w=1200&lazy=load",
   "https://images.pexels.com/photos/19696637/pexels-photo-19696637.jpeg?auto=compress&cs=tinysrgb&w=1200&lazy=load",
   "https://images.pexels.com/photos/19540163/pexels-photo-19540163.jpeg?auto=compress&cs=tinysrgb&w=1200&lazy=load",
-  "https://images.pexels.com/photos/19789102/pexels-photo-19789102.jpeg?auto=compress&cs=tinysrgb&w=1200&lazy=load"
+  "https://images.pexels.com/photos/19789102/pexels-photo-19789102.jpeg?auto=compress&cs=tinysrgb&w=1200&lazy=load",
 ];

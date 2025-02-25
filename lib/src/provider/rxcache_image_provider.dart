@@ -37,7 +37,9 @@ class RxCacheImageProvider extends ImageProvider<RxCacheImageProvider> {
 
   @override
   ImageStreamCompleter loadImage(
-      RxCacheImageProvider key, ImageDecoderCallback decode) {
+    RxCacheImageProvider key,
+    ImageDecoderCallback decode,
+  ) {
     final chunkEvents = StreamController<ImageChunkEvent>();
     final imageStream = MultiImageStreamCompleter(
       codec: _loadImageAsync(key, chunkEvents, decode),
@@ -67,9 +69,10 @@ class RxCacheImageProvider extends ImageProvider<RxCacheImageProvider> {
   }
 
   Stream<ui.Codec> _loadImageAsync(
-      RxCacheImageProvider key,
-      StreamController<ImageChunkEvent> chunkEvents,
-      ImageDecoderCallback decode) async* {
+    RxCacheImageProvider key,
+    StreamController<ImageChunkEvent> chunkEvents,
+    ImageDecoderCallback decode,
+  ) async* {
     assert(url.length > 5, "invalid url");
     try {
       final mKeyCache = cacheKey ?? Uri.parse(url).pathSegments.last;
@@ -104,16 +107,20 @@ class RxCacheImageProvider extends ImageProvider<RxCacheImageProvider> {
           headers: headers,
           key: cacheKey,
           onBytesReceived: (cumulative, total) {
-            chunkEvents.add(ImageChunkEvent(
-              cumulativeBytesLoaded: cumulative,
-              expectedTotalBytes: total,
-            ));
+            chunkEvents.add(
+              ImageChunkEvent(
+                cumulativeBytesLoaded: cumulative,
+                expectedTotalBytes: total,
+              ),
+            );
           },
         );
 
         if (bytes == null) {
           throw NetworkImageLoadException(
-              statusCode: HttpStatus.badRequest, uri: Uri.parse(url));
+            statusCode: HttpStatus.badRequest,
+            uri: Uri.parse(url),
+          );
         }
 
         final imByte = await ImmutableBuffer.fromUint8List(bytes);
@@ -122,7 +129,7 @@ class RxCacheImageProvider extends ImageProvider<RxCacheImageProvider> {
       }
 
       ///
-    } on Object catch (_, __) {
+    } on Object catch (_) {
       scheduleMicrotask(() {
         evict();
       });

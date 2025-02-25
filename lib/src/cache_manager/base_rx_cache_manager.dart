@@ -20,9 +20,10 @@ class BaseRxCacheManager implements RxCacheManagerMixing {
   // We set `autoUncompress` to false to ensure that we can trust the value of
   // the `Content-Length` HTTP header. We automatically uncompress the content
   // in our call to [consolidateHttpClientResponseBytes].
-  static final HttpClient _sharedHttpClient = HttpClient()
-    ..connectionTimeout = timeOut
-    ..idleTimeout = timeOut;
+  static final HttpClient _sharedHttpClient =
+      HttpClient()
+        ..connectionTimeout = timeOut
+        ..idleTimeout = timeOut;
 
   static HttpClient get _httpClient {
     HttpClient? client;
@@ -107,7 +108,9 @@ class BaseRxCacheManager implements RxCacheManagerMixing {
       if (response.statusCode != HttpStatus.ok) {
         await response.drain<List<int>>(<int>[]);
         throw NetworkImageLoadException(
-            statusCode: response.statusCode, uri: resolved);
+          statusCode: response.statusCode,
+          uri: resolved,
+        );
       }
 
       // final request = http.Request("GET", resolved);
@@ -131,7 +134,7 @@ class BaseRxCacheManager implements RxCacheManagerMixing {
       ///save file to dis
       await ioSink.close();
       _loadImageTask.remove(fileName);
-    } catch (_, __) {
+    } catch (_) {
       _loadImageTask.remove(fileName);
     }
   }
@@ -139,7 +142,7 @@ class BaseRxCacheManager implements RxCacheManagerMixing {
   Future<void> _createCacheFolder() async {
     final path = await getApplicationCacheDirectory();
     final mFile = File("${path.path}/$_folder");
-    Directory(mFile.path).createSync(recursive: true);
+    await Directory(mFile.path).create(recursive: true);
     _cacheFolder = mFile.path;
   }
 
@@ -164,7 +167,7 @@ class BaseRxCacheManager implements RxCacheManagerMixing {
           setImageCache(mKey ?? '', bytes);
         }
       }
-    } catch (_, __) {
+    } catch (_) {
       mFile = null;
     }
 
@@ -218,7 +221,9 @@ class BaseRxCacheManager implements RxCacheManagerMixing {
       if (response.statusCode != HttpStatus.ok) {
         await response.drain<List<int>>(<int>[]);
         throw NetworkImageLoadException(
-            statusCode: response.statusCode, uri: resolved);
+          statusCode: response.statusCode,
+          uri: resolved,
+        );
       }
 
       List<int> bytes = [];
@@ -261,7 +266,7 @@ class BaseRxCacheManager implements RxCacheManagerMixing {
       ///set to memory cache
       setImageCache(fileName ?? '', mBytes);
       return mBytes;
-    } catch (_, __) {
+    } catch (_) {
       final bytes = getFormMemoryCache(fileName ?? '');
 
       return bytes;
