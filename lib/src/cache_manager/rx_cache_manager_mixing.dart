@@ -31,7 +31,7 @@ mixin RxCacheManagerMixing {
 
   void setImageCache(String key, Uint8List bytes);
 
-  Uint8List? getFormMemoryCache(String key);
+  Uint8List? getFormMemoryCache(String key, {String? url});
 
   int currentMemoryCacheSize();
 }

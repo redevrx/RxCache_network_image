@@ -69,7 +69,8 @@ class BaseRxCacheManager implements RxCacheManagerMixing {
       await getCache();
     }
     if (url == null || url.isEmpty == true) return;
-    final fileName = key ?? Uri.parse(url).pathSegments.lastOrNull;
+    String? fileName = key ?? Uri.parse(url).pathSegments.lastOrNull;
+    fileName = fileName?.replaceAll(RegExp('[,\\/\\\\]'), '');
 
     ///check waiting download
     if (!_loadImageTask.contains(fileName ?? '')) {
@@ -153,7 +154,8 @@ class BaseRxCacheManager implements RxCacheManagerMixing {
       if (cacheFolder.isEmpty) {
         await _createCacheFolder();
       }
-      final mKey = url == null ? key : Uri.parse(url).pathSegments.last;
+      String? mKey = url == null ? key : Uri.parse(url).pathSegments.last;
+      mKey = mKey?.replaceAll(RegExp('[,\\/\\\\]'), '');
       mFile = File("$_cacheFolder/$mKey");
 
       ///check exit in memory
@@ -197,7 +199,8 @@ class BaseRxCacheManager implements RxCacheManagerMixing {
     void Function(int, int?)? onBytesReceived,
   }) async {
     final Uri resolved = Uri.base.resolve(url ?? '');
-    final fileName = key ?? resolved.pathSegments.lastOrNull;
+    String? fileName = key ?? resolved.pathSegments.lastOrNull;
+    fileName = fileName?.replaceAll(RegExp('[,\\/\\\\]'), '');
     final mFile = File("$cacheFolder/$fileName");
 
     try {
@@ -306,9 +309,16 @@ class BaseRxCacheManager implements RxCacheManagerMixing {
   }
 
   @override
-  Uint8List? getFormMemoryCache(String key) {
-    if (_cacheImages.containsKey(key)) {
-      return _cacheImages[key];
+  Uint8List? getFormMemoryCache(String key, {String? url}) {
+    final mKey =
+        url != null
+            ? Uri.parse(
+              url,
+            ).pathSegments.last.replaceAll(RegExp('[,\\/\\\\]'), '')
+            : key;
+
+    if (_cacheImages.containsKey(mKey)) {
+      return _cacheImages[mKey];
     }
 
     return null;

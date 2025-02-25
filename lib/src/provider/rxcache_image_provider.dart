@@ -75,7 +75,9 @@ class RxCacheImageProvider extends ImageProvider<RxCacheImageProvider> {
   ) async* {
     assert(url.length > 5, "invalid url");
     try {
-      final mKeyCache = cacheKey ?? Uri.parse(url).pathSegments.last;
+      String mKeyCache = cacheKey ?? Uri.parse(url).pathSegments.last;
+      mKeyCache = mKeyCache.replaceAll(RegExp('[,\\/\\\\]'), '');
+
       if (cacheManager?.cacheFolder == null ||
           cacheManager?.cacheFolder == "") {
         await cacheManager?.getCache();
