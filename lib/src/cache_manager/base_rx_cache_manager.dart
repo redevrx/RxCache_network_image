@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rxcache_network_image/src/cache_manager/rx_cache_manager_mixing.dart';
+import 'package:rxcache_network_image/src/utils/log.dart';
 
 class BaseRxCacheManager implements RxCacheManagerMixing {
   final String _folder;
@@ -44,6 +45,7 @@ class BaseRxCacheManager implements RxCacheManagerMixing {
 
   @override
   void clearCache() async {
+    println("start clearCache");
     final cache = await getCache();
     try {
       final folder = Directory(cache);
@@ -54,7 +56,11 @@ class BaseRxCacheManager implements RxCacheManagerMixing {
           }
         }
       }
-    } catch (_) {}
+
+      println("clearCache success");
+    } catch (e) {
+      println("clearCache error: $e");
+    }
   }
 
   ///[download]
@@ -135,8 +141,10 @@ class BaseRxCacheManager implements RxCacheManagerMixing {
       ///save file to dis
       await ioSink.close();
       _loadImageTask.remove(fileName);
-    } catch (_) {
+      println("download image: $url");
+    } catch (e) {
       _loadImageTask.remove(fileName);
+      println("download image: $url \nfailed: $e");
     }
   }
 
@@ -145,6 +153,7 @@ class BaseRxCacheManager implements RxCacheManagerMixing {
     final mFile = File("${path.path}/$_folder");
     await Directory(mFile.path).create(recursive: true);
     _cacheFolder = mFile.path;
+    println("Create Cache Folder Success");
   }
 
   @override
@@ -215,6 +224,7 @@ class BaseRxCacheManager implements RxCacheManagerMixing {
         return fileBytes;
       }
 
+      println("download image url: $url");
       final request = await _httpClient.getUrl(resolved);
       headers?.forEach((String name, String value) {
         request.headers.add(name, value);
@@ -269,8 +279,9 @@ class BaseRxCacheManager implements RxCacheManagerMixing {
       ///set to memory cache
       setImageCache(fileName ?? '', mBytes);
       return mBytes;
-    } catch (_) {
+    } catch (e) {
       final bytes = getFormMemoryCache(fileName ?? '');
+      println("download image stream failed: $e");
 
       return bytes;
     }

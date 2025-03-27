@@ -1,3 +1,7 @@
+## 1.1.0
+- Fix Bugs
+- Add Log
+
 ## 1.0.9
 - Add Url to getFormMemoryCache
 
