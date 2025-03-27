@@ -45,13 +45,11 @@ class RxCacheImageProvider extends ImageProvider<RxCacheImageProvider> {
       codec: _loadImageAsync(key, chunkEvents, decode),
       chunkEvents: chunkEvents.stream,
       scale: key.scale,
-      informationCollector: () sync* {
-        yield DiagnosticsProperty<ImageProvider>(
-          'Image provider: $this \n Image key: $key',
-          this,
-          style: DiagnosticsTreeStyle.errorProperty,
-        );
-      },
+      informationCollector:
+          () => <DiagnosticsNode>[
+            DiagnosticsProperty<ImageProvider>('Image provider', this),
+            DiagnosticsProperty<RxCacheImageProvider>('Image key', key),
+          ],
     );
 
     if (errorListener != null) {
@@ -133,7 +131,8 @@ class RxCacheImageProvider extends ImageProvider<RxCacheImageProvider> {
       ///
     } on Object catch (_) {
       scheduleMicrotask(() {
-        evict();
+        PaintingBinding.instance.imageCache.evict(key);
+        // evict();
       });
       rethrow;
     } finally {

@@ -1,3 +1,6 @@
+## 1.1.1
+- update decode image
+
 ## 1.1.0
 - Fix Bugs
 - Add Log
